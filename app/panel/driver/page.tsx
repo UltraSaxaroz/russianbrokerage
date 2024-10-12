@@ -20,14 +20,7 @@ const Page = () => {
     const [number, setNumber] = useState('')
     const [locationFrom, setLocationFrom] = useState('')
     const [locationTo, setLocationTo] = useState('')
-    const [role, setRole] = useState('Driver');
-    const [name, setName] = useState("")
     const [weight, setWeight] = useState<string>('');
-    const [brokerNumber, setBrokerNumber] = useState("")
-    const [brokerSecondNumber, setBrokerSecondNumber] = useState("")
-    const [companyName, setCompanyName] = useState("")
-    const [dateRange, setDateRange] = useState<DateRange | undefined>()
-    const [loadReferenceId, setLoadReferenceId] = useState("")
     const [description, setDescription] = useState('');
 
     const handleClearInput = () => {
@@ -36,11 +29,6 @@ const Page = () => {
         setLocationFrom('');
         setLocationTo('');
         setNumber('');
-        setName('');
-        setBrokerNumber('');
-        setBrokerSecondNumber('')
-        setCompanyName('');
-        setLoadReferenceId('');
         setWeight('')
     }
 
@@ -52,7 +40,7 @@ const Page = () => {
 
         try {
             // const res = await fetch('/api/broking/driver', {
-            const res = await fetch('/api/auth/broking/driver', {
+            const res = await fetch('/api/data', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -79,9 +67,9 @@ const Page = () => {
             <CardHeader>
                 <CardTitle className="text-2xl font-bold">Add Driver Data</CardTitle>
             </CardHeader>
-                <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="flex gap-12">
+            <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="flex gap-12">
                         <div className="flex flex-col space-y-4">
                             <div className="space-y-2">
                                 <Label htmlFor="fullname">Full Name</Label>
@@ -124,26 +112,26 @@ const Page = () => {
                             </div>
                         </div>
                         <div className="flex flex-col space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="weight">Weight</Label>
-                            <Input id="weight" placeholder="30000" required value={weight}
-                                   onChange={(e) => setWeight(e.target.value)}/>
+                            <div className="space-y-2">
+                                <Label htmlFor="weight">Weight</Label>
+                                <Input id="weight" placeholder="30000" required value={weight}
+                                       onChange={(e) => setWeight(e.target.value)}/>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="from">From</Label>
+                                <Input id="from" placeholder="Starting location" required value={locationFrom}
+                                       onChange={(e) => setLocationFrom(e.target.value)}/>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="to">To</Label>
+                                <Input id="to" placeholder="Destination" required value={locationTo}
+                                       onChange={(e) => setLocationTo(e.target.value)}/>
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="from">From</Label>
-                            <Input id="from" placeholder="Starting location" required value={locationFrom}
-                                   onChange={(e) => setLocationFrom(e.target.value)}/>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="to">To</Label>
-                            <Input id="to" placeholder="Destination" required value={locationTo}
-                                   onChange={(e) => setLocationTo(e.target.value)}/>
-                        </div>
-                        </div>
-                        </div>
-                        <Button type="submit" className="w-full">Submit</Button>
-                    </form>
-                </CardContent>
+                    </div>
+                    <Button type="submit" className="w-full">Submit</Button>
+                </form>
+            </CardContent>
         </Card>
     );
 };

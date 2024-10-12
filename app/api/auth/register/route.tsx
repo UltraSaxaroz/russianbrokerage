@@ -2,6 +2,7 @@
 import { hash } from 'bcrypt';
 import clientPromise from '@/lib/mongodb';
 import { NextRequest, NextResponse } from 'next/server';
+import jwt from "jsonwebtoken";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
     const { email, name, password } = await request.json();
@@ -21,6 +22,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         name,
         password: hashedPassword,
     });
+
+
 
     return new NextResponse(JSON.stringify({ message: 'User created successfully' }), { status: 201 });
 }

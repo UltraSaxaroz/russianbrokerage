@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Truck, Phone, Search, Users, ChevronRight } from "lucide-react"
+import { Truck, Phone, Search, ChevronRight } from "lucide-react"
 
 export default function Homepage() {
     return (
@@ -21,9 +21,6 @@ export default function Homepage() {
                     <div className="flex space-x-3">
                         <Button variant="outline" asChild>
                             <Link href="/auth">Войти</Link>
-                        </Button>
-                        <Button asChild className="bg-blue-600 hover:bg-blue-700">
-                            <Link href="/auth">Регистрация</Link>
                         </Button>
                     </div>
                 </div>

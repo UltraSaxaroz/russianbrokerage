@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, {Suspense, useEffect, useState} from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { User, Mail, Hexagon } from 'lucide-react'
+import ProfileSkeleton from "@/components/skeletons/profileSkeleton";
 
 interface UserData {
     _id: string;
@@ -58,6 +59,7 @@ const Page = () => {
     return (
         <div
             className="w-full min-h-screen bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center p-4">
+            <Suspense fallback={<ProfileSkeleton />}>
             {data.length > 0 ? (
                 <div className={'w-full flex justify-center'}>
                     {data.map((item) => (
@@ -105,6 +107,7 @@ const Page = () => {
             ) : (
                 <div></div>
             )}
+            </Suspense>
 <Toaster/>
 </div>
 )
