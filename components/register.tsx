@@ -9,6 +9,7 @@ import {useRouter} from "next/navigation";
 const Register = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [name, setName] = useState('')
     const [error, setError] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const router = useRouter();
@@ -36,7 +37,7 @@ const Register = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({email, password}),
+                body: JSON.stringify({name, email, password}),
             })
 
             const data = await res.json()
@@ -63,12 +64,21 @@ const Register = () => {
                 <form onSubmit={handleSubmit}>
                     <CardContent className="space-y-4">
                         <div className="space-y-2">
+                            <div className="space-y-2">
+                                <Label htmlFor="register-name">Имя</Label>
+                                <Input
+                                    id="register-name"
+                                    placeholder="Иван Иванов"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                />
+                            </div>
                             <Label htmlFor="register-email">Почта</Label>
                             <Input
                                 id="register-email"
                                 type="email"
                                 placeholder="name@example.com"
-                                value = {email}
+                                value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />
                         </div>
@@ -77,8 +87,8 @@ const Register = () => {
                             <Input
                                 id="register-password"
                                 type="password"
-                                value = {password}
-                                onChange = {(e) => setPassword(e.target.value)}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
                             />
                         </div>
                     </CardContent>

@@ -4,7 +4,7 @@ import clientPromise from '@/lib/mongodb';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-    const { email, password } = await request.json();
+    const { email, name, password } = await request.json();
 
     const hashedPassword = await hash(password, 10);
     const client = await clientPromise;
@@ -18,6 +18,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     await db.collection('users').insertOne({
         email,
+        name,
         password: hashedPassword,
     });
 
