@@ -69,7 +69,7 @@ const Page = () => {
             </CardHeader>
             <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="flex gap-12">
+                    <div className="flex sm:gap-12 gap-4 flex-col sm:flex-row">
                         <div className="flex flex-col space-y-4">
                             <div className="space-y-2">
                                 <Label htmlFor="fullname">Full Name</Label>

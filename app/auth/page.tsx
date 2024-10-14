@@ -8,15 +8,15 @@ import Register from "@/components/register";
 
 export default function Component() {
     const [activeTab, setActiveTab] = useState("login")
-    const router = useRouter();
-
-    useEffect(() => {
-        const token = localStorage.getItem('token');
-
-        if (token) {
-            router.push('/panel')
-        }
-    }, [router]);
+    // const router = useRouter();
+    //
+    // useEffect(() => {
+    //     const token = localStorage.getItem('token');
+    //
+    //     if (token) {
+    //         router.push('/panel')
+    //     }
+    // }, [router]);
 
     return (
         <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 p-4 overflow-hidden">
