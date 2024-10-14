@@ -52,7 +52,7 @@ export default function AsidePanel() {
     }, [isOpen, isMobile])
 
     return (
-        <>
+        <div className={''}>
             {isMobile && (
                 <button
                     onClick={toggleMenu}
@@ -124,7 +124,7 @@ export default function AsidePanel() {
                                     }}
                                 >
                                     <item.icon className={`w-4 h-4 ${isActive ? 'text-gray-900' : 'text-gray-500'}`} />
-                                    <span className="text-sm font-medium">{item.name}</span>
+                                    <span className="text-base font-medium">{item.name}</span>
                                 </Link>
                             </motion.div>
                         )
@@ -173,6 +173,6 @@ export default function AsidePanel() {
                     ></path>
                 </motion.svg>
             </motion.aside>
-        </>
+        </div>
     )
 }
