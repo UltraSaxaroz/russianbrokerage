@@ -29,7 +29,7 @@ const Page = () => {
                 return;
             }
 
-            const response = await fetch('/api/user/', {
+            const response = await fetch('/api/profile/', {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${token}` },
             });

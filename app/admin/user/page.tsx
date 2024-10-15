@@ -1,13 +1,14 @@
 'use client';
 
-import React, { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChevronLeft, ChevronRight, Search, UserPlus } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"; // Импорт для модального окна
-import { useToast} from "@/hooks/use-toast"; // Предположим, что используется Toast для уведомлений
+import React, {useEffect, useState} from "react";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
+import {ChevronLeft, ChevronRight, LucideX, Search, UserPlus} from "lucide-react";
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
+import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter} from "@/components/ui/dialog"; // Импорт для модального окна
+import {useToast} from "@/hooks/use-toast";
+import Link from "next/link"; // Предположим, что используется Toast для уведомлений
 
 export default function Page() {
     const [users, setUsers] = useState<any[]>([]);
@@ -15,8 +16,8 @@ export default function Page() {
     const [error, setError] = useState<string | null>(null);
     const [editUser, setEditUser] = useState<any | null>(null); // Состояние для редактируемого пользователя
     const [showModal, setShowModal] = useState(false); // Состояние для отображения модального окна
-    const [formData, setFormData] = useState({ name: '', email: '', role: '' });
-    const { toast } = useToast(); // Для уведомлений
+    const [formData, setFormData] = useState({name: '', email: '', role: ''});
+    const {toast} = useToast(); // Для уведомлений
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -49,13 +50,13 @@ export default function Page() {
 
     const handleEditClick = (user: any) => {
         setEditUser(user);
-        setFormData({ name: user.name, email: user.email, role: user.role });
+        setFormData({name: user.name, email: user.email, role: user.role});
         setShowModal(true);
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData(prevData => ({ ...prevData, [name]: value }));
+        const {name, value} = e.target;
+        setFormData(prevData => ({...prevData, [name]: value}));
     };
 
     const handleSave = async () => {
@@ -78,18 +79,18 @@ export default function Page() {
             if (!res.ok) {
                 throw new Error('Failed to update user');
             }
-            console.log('Sending data:', { _id: editUser._id, ...formData });
+            console.log('Sending data:', {_id: editUser._id, ...formData});
             // Обновляем данные после успешного запроса
             setUsers(prevUsers =>
                 prevUsers.map(user =>
-                    user._id === editUser._id ? { ...user, ...formData } : user
+                    user._id === editUser._id ? {...user, ...formData} : user
                 )
             );
 
             setShowModal(false);
-            toast({ description: 'User updated successfully!' });
+            toast({description: 'User updated successfully!'});
         } catch (error) {
-            toast({ description: 'Failed to update user', variant: 'destructive' });
+            toast({description: 'Failed to update user', variant: 'destructive'});
         }
     };
 
@@ -106,17 +107,19 @@ export default function Page() {
             <div className="bg-white rounded-lg shadow-md p-6">
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
-                    <Button className="bg-blue-500 hover:bg-blue-600 text-white">
-                        <UserPlus className="mr-2 h-4 w-4" />
-                        Add New User
-                    </Button>
+                    <Link href={"/admin/register"}>
+                        <Button className="bg-blue-500 hover:bg-blue-600 text-white">
+                            <UserPlus className="mr-2 h-4 w-4"/>
+                            Add New User
+                        </Button>
+                    </Link>
                 </div>
                 <div className="mb-4 relative">
                     <Input
                         className="pl-10"
                         placeholder="Search users..."
                     />
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5"/>
                 </div>
                 <Table>
                     <TableHeader>
@@ -133,7 +136,8 @@ export default function Page() {
                                 <TableCell className="font-medium">
                                     <div className="flex items-center">
                                         <Avatar className="h-8 w-8 mr-2">
-                                            <AvatarImage src={user.avatarUrl || "/placeholder.svg?height=32&width=32"} alt={user.name} />
+                                            <AvatarImage src={user.avatarUrl || "/placeholder.svg?height=32&width=32"}
+                                                         alt={user.name}/>
                                             <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                                         </Avatar>
                                         {user.name}
@@ -142,8 +146,13 @@ export default function Page() {
                                 <TableCell>{user.email}</TableCell>
                                 <TableCell>{user.role || "User"}</TableCell>
                                 <TableCell className="text-right">
-                                    <Button variant="ghost" className="text-blue-500 hover:text-blue-600" onClick={() => handleEditClick(user)}>
+                                    <Button variant="ghost" className="text-blue-500 hover:text-blue-600"
+                                            onClick={() => handleEditClick(user)}>
                                         Edit
+                                    </Button>
+                                    <Button variant="ghost" className="text-blue-500 hover:text-blue-600"
+                                            onClick={() => handleEditClick(user)}>
+                                        <LucideX/>
                                     </Button>
                                 </TableCell>
                             </TableRow>
@@ -154,10 +163,10 @@ export default function Page() {
                     <p className="text-sm text-gray-600">Showing {users.length} of 20 users</p>
                     <div className="flex items-center space-x-2">
                         <Button variant="outline" size="icon">
-                            <ChevronLeft className="h-4 w-4" />
+                            <ChevronLeft className="h-4 w-4"/>
                         </Button>
                         <Button variant="outline" size="icon">
-                            <ChevronRight className="h-4 w-4" />
+                            <ChevronRight className="h-4 w-4"/>
                         </Button>
                     </div>
                 </div>
