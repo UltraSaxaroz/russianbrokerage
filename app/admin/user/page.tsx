@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -6,11 +6,17 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ChevronLeft, ChevronRight, Search, UserPlus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"; // Импорт для модального окна
+import { useToast} from "@/hooks/use-toast"; // Предположим, что используется Toast для уведомлений
 
 export default function Page() {
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [editUser, setEditUser] = useState<any | null>(null); // Состояние для редактируемого пользователя
+    const [showModal, setShowModal] = useState(false); // Состояние для отображения модального окна
+    const [formData, setFormData] = useState({ name: '', email: '', role: '' });
+    const { toast } = useToast(); // Для уведомлений
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -40,6 +46,52 @@ export default function Page() {
 
         fetchUsers();
     }, []);
+
+    const handleEditClick = (user: any) => {
+        setEditUser(user);
+        setFormData({ name: user.name, email: user.email, role: user.role });
+        setShowModal(true);
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData(prevData => ({ ...prevData, [name]: value }));
+    };
+
+    const handleSave = async () => {
+        if (!editUser) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/user', {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    _id: editUser._id,
+                    ...formData,
+                }),
+            });
+
+            if (!res.ok) {
+                throw new Error('Failed to update user');
+            }
+
+            // Обновляем данные после успешного запроса
+            setUsers(prevUsers =>
+                prevUsers.map(user =>
+                    user._id === editUser._id ? { ...user, ...formData } : user
+                )
+            );
+
+            setShowModal(false);
+            toast({ description: 'User updated successfully!' });
+        } catch (error) {
+            toast({ description: 'Failed to update user', variant: 'destructive' });
+        }
+    };
 
     if (loading) {
         return <div>Loading users...</div>;
@@ -90,7 +142,7 @@ export default function Page() {
                                 <TableCell>{user.email}</TableCell>
                                 <TableCell>{user.role || "User"}</TableCell>
                                 <TableCell className="text-right">
-                                    <Button variant="ghost" className="text-blue-500 hover:text-blue-600">
+                                    <Button variant="ghost" className="text-blue-500 hover:text-blue-600" onClick={() => handleEditClick(user)}>
                                         Edit
                                     </Button>
                                 </TableCell>
@@ -110,6 +162,41 @@ export default function Page() {
                     </div>
                 </div>
             </div>
+
+            {/* Модальное окно для редактирования пользователя */}
+            {showModal && (
+                <Dialog open={showModal} onOpenChange={setShowModal}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Edit User</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                            <Input
+                                name="name"
+                                value={formData.name}
+                                onChange={handleInputChange}
+                                placeholder="Name"
+                            />
+                            <Input
+                                name="email"
+                                value={formData.email}
+                                onChange={handleInputChange}
+                                placeholder="Email"
+                            />
+                            <Input
+                                name="role"
+                                value={formData.role}
+                                onChange={handleInputChange}
+                                placeholder="Role"
+                            />
+                        </div>
+                        <DialogFooter>
+                            <Button onClick={() => setShowModal(false)}>Cancel</Button>
+                            <Button onClick={handleSave} className="bg-blue-500 text-white">Save</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            )}
         </div>
     );
 }
