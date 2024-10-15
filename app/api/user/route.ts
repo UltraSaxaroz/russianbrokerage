@@ -51,7 +51,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         }).filter(user => user !== null);
 
         // Возвращаем массив всех пользователей
-        return NextResponse.json({ data: userData }, { status: 200 });
+        return NextResponse.json({data: userData}, {status: 200});
     } catch (err) {
         console.error('Error fetching users:', err);
         return NextResponse.json({message: 'Server error'}, {status: 500});
@@ -79,7 +79,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
     const db = client.db();
 
     try {
-        const { _id, name, email, role } = await request.json();
+        const {_id, name, email, role} = await request.json();
         console.log(_id, name, email, role);
         await db.collection('users').updateOne(
             {_id: new ObjectId(_id)},  // Проверяем принадлежность данных пользователю
@@ -89,6 +89,37 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
         return NextResponse.json({message: 'Driver updated successfully'}, {status: 200});
     } catch (err) {
         console.error(err);
+        return NextResponse.json({message: 'Server error'}, {status: 500});
+    }
+}
+
+export async function DELETE(request: NextRequest): Promise<NextResponse> {
+    const token = request.headers.get('authorization')?.split(' ')[1];
+    if (!token) {
+        return NextResponse.json({message: 'Access denied'}, {status: 401});
+    }
+
+    let decoded: JwtPayload | null = null;
+
+    try {
+        decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+        if (!decoded || typeof decoded !== 'object' || !decoded.id) {
+            return NextResponse.json({message: 'Invalid token'}, {status: 403});
+        }
+    } catch (err) {
+        return NextResponse.json({message: 'Invalid token or server error'}, {status: 403});
+    }
+
+    const client = await clientPromise;
+    const db = client.db();
+
+    try {
+        const {_id} = await request.json(); // Expecting the user ID from the request body
+        await db.collection('users').deleteOne({_id: new ObjectId(_id)});
+
+        return NextResponse.json({message: 'User deleted successfully'}, {status: 200});
+    } catch (err) {
+        console.error('Error deleting user:', err);
         return NextResponse.json({message: 'Server error'}, {status: 500});
     }
 }

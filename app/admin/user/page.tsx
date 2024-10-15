@@ -94,6 +94,32 @@ export default function Page() {
         }
     };
 
+    const handleDeleteClick = async (userId: string) => {
+        if (!confirm('Are you sure you want to delete this user?')) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/user', {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ _id: userId }),
+            });
+
+            if (!res.ok) {
+                throw new Error('Failed to delete user');
+            }
+
+            // Update UI after deletion
+            setUsers(prevUsers => prevUsers.filter(user => user._id !== userId));
+            toast({ description: 'User deleted successfully!' });
+        } catch (error) {
+            toast({ description: 'Failed to delete user', variant: 'destructive' });
+        }
+    };
+
     if (loading) {
         return <div>Loading users...</div>;
     }
@@ -145,13 +171,13 @@ export default function Page() {
                                 </TableCell>
                                 <TableCell>{user.email}</TableCell>
                                 <TableCell>{user.role || "User"}</TableCell>
-                                <TableCell className="text-right">
+                                <TableCell className="text-right flex items-center">
                                     <Button variant="ghost" className="text-blue-500 hover:text-blue-600"
                                             onClick={() => handleEditClick(user)}>
                                         Edit
                                     </Button>
                                     <Button variant="ghost" className="text-blue-500 hover:text-blue-600"
-                                            onClick={() => handleEditClick(user)}>
+                                            onClick={() => handleDeleteClick(user._id)}>
                                         <LucideX/>
                                     </Button>
                                 </TableCell>
