@@ -17,20 +17,20 @@ export default function Page() {
     const router = useRouter()
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
-        setIsLoading(true);
+        e.preventDefault()
+        setError('')
+        setIsLoading(true)
 
         if (!email.includes('@')) {
-            setError('Please enter a valid email address');
-            setIsLoading(false);
-            return;
+            setError('Please enter a valid email address')
+            setIsLoading(false)
+            return
         }
 
         if (password.length < 8) {
-            setError('Password must be at least 8 characters long');
-            setIsLoading(false);
-            return;
+            setError('Password must be at least 8 characters long')
+            setIsLoading(false)
+            return
         }
 
         try {
@@ -39,21 +39,22 @@ export default function Page() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                // Изменение здесь: теперь передаём name вместо username
-                body: JSON.stringify({ name: username, email, password }), // Передаём name как username
-            });
+                body: JSON.stringify({ username, email, password }),
+            })
 
-            const data = await res.json();
+            const data = await res.json()
 
-            if (!res.ok) {
-                setError(data.message || 'An error occurred');
+            if (res.ok) {
+                router.push('/panel')
+            } else {
+                setError(data.message || 'An error occurred')
             }
         } catch (error) {
-            setError('An error occurred');
+            setError('An error occurred')
         } finally {
-            setIsLoading(false);
+            setIsLoading(false)
         }
-    };
+    }
 
     return (
         <div className="min-h-screen w-full bg-gray-100 flex items-center justify-center p-4">
