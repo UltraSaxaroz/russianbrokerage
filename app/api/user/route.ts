@@ -44,7 +44,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 }
 
-export async function PATCH(request: NextRequest): Promise<NextResponse> {
+export async function PUT(request: NextRequest): Promise<NextResponse> {
     const token = request.headers.get('authorization')?.split(' ')[1];
     if (!token) {
         return NextResponse.json({message: 'Access denied'}, {status: 401});
@@ -68,7 +68,7 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
         const {id, name, email, role} = await request.json();
 
         await db.collection('users').updateOne(
-            {_id: new ObjectId(id)},  // Проверяем принадлежность данных пользователю
+            {_id: id},  // Проверяем принадлежность данных пользователю
             {$set: {name, email, role}}
         );
 

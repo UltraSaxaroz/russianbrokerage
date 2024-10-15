@@ -64,7 +64,7 @@ export default function Page() {
         try {
             const token = localStorage.getItem('token');
             const res = await fetch('/api/user', {
-                method: 'PATCH',
+                method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
