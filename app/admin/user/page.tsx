@@ -99,7 +99,7 @@ export default function Page() {
                     </TableBody>
                 </Table>
                 <div className="flex items-center justify-between mt-4">
-                    <p className="text-sm text-gray-600">Showing {users.length} of 30 users</p>
+                    <p className="text-sm text-gray-600">Showing {users.length} of 20 users</p>
                     <div className="flex items-center space-x-2">
                         <Button variant="outline" size="icon">
                             <ChevronLeft className="h-4 w-4" />
