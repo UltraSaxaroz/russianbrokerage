@@ -6,23 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ChevronLeft, ChevronRight, Search, UserPlus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-    Dialog,
-    DialogTrigger,
-    DialogContent,
-    DialogOverlay,
-    DialogClose,
-    DialogTitle,
-    DialogDescription,
-} from "@/components/ui/dialog"; // Импортируем компоненты из ShadCN
 
 export default function Page() {
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [showModal, setShowModal] = useState(false);
-    const [editUser, setEditUser] = useState<any>(null);
-    const [formData, setFormData] = useState({ name: '', email: '', role: '' });
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -30,7 +18,7 @@ export default function Page() {
             setError(null);
 
             try {
-                const token = localStorage.getItem('token');
+                const token = localStorage.getItem('token'); // Предположим, что токен хранится в localStorage
                 const res = await fetch('/api/user', {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -53,38 +41,6 @@ export default function Page() {
         fetchUsers();
     }, []);
 
-    const handleEditClick = (user: any) => {
-        setEditUser(user);
-        setFormData({ name: user.name, email: user.email, role: user.role });
-        setShowModal(true);
-    };
-
-    const handleFormSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        const token = localStorage.getItem('token');
-
-        try {
-            const response = await fetch('/api/user', {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ _id: editUser._id, ...formData }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to update user');
-            }
-
-            const updatedUser = await response.json();
-            setUsers(users.map(user => user._id === updatedUser._id ? updatedUser : user));
-            setShowModal(false);
-        } catch (error: any) {
-            console.error('Error updating user:', error);
-        }
-    };
-
     if (loading) {
         return <div>Loading users...</div>;
     }
@@ -98,54 +54,10 @@ export default function Page() {
             <div className="bg-white rounded-lg shadow-md p-6">
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <Button className="bg-blue-500 hover:bg-blue-600 text-white">
-                                <UserPlus className="mr-2 h-4 w-4" />
-                                Add New User
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogTitle>Add New User</DialogTitle>
-                            <form onSubmit={handleFormSubmit}>
-                                <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700">Name</label>
-                                    <Input
-                                        type="text"
-                                        value={formData.name}
-                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        required
-                                    />
-                                </div>
-                                <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700">Email</label>
-                                    <Input
-                                        type="email"
-                                        value={formData.email}
-                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                        required
-                                    />
-                                </div>
-                                <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700">Role</label>
-                                    <Input
-                                        type="text"
-                                        value={formData.role}
-                                        onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                                        required
-                                    />
-                                </div>
-                                <div className="flex justify-end">
-                                    <Button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white">
-                                        Update User
-                                    </Button>
-                                </div>
-                            </form>
-                            <DialogClose className="absolute right-4 top-4">
-                                <span className="sr-only">Close</span>
-                            </DialogClose>
-                        </DialogContent>
-                    </Dialog>
+                    <Button className="bg-blue-500 hover:bg-blue-600 text-white">
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        Add New User
+                    </Button>
                 </div>
                 <div className="mb-4 relative">
                     <Input
@@ -172,18 +84,13 @@ export default function Page() {
                                             <AvatarImage src={user.avatarUrl || "/placeholder.svg?height=32&width=32"} alt={user.name} />
                                             <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                                         </Avatar>
-
                                         {user.name}
                                     </div>
                                 </TableCell>
                                 <TableCell>{user.email}</TableCell>
                                 <TableCell>{user.role || "User"}</TableCell>
                                 <TableCell className="text-right">
-                                    <Button
-                                        variant="ghost"
-                                        className="text-blue-500 hover:text-blue-600"
-                                        onClick={() => handleEditClick(user)}
-                                    >
+                                    <Button variant="ghost" className="text-blue-500 hover:text-blue-600">
                                         Edit
                                     </Button>
                                 </TableCell>
@@ -192,7 +99,7 @@ export default function Page() {
                     </TableBody>
                 </Table>
                 <div className="flex items-center justify-between mt-4">
-                    <p className="text-sm text-gray-600">Showing {users.length} of {users.length} users</p>
+                    <p className="text-sm text-gray-600">Showing {users.length} of 20 users</p>
                     <div className="flex items-center space-x-2">
                         <Button variant="outline" size="icon">
                             <ChevronLeft className="h-4 w-4" />
@@ -203,51 +110,6 @@ export default function Page() {
                     </div>
                 </div>
             </div>
-
-            {/* Модальное окно для редактирования пользователя */}
-            <Dialog open={showModal} onOpenChange={setShowModal}>
-                <DialogOverlay />
-                <DialogContent>
-                    <DialogTitle>Edit User</DialogTitle>
-                    <form onSubmit={handleFormSubmit}>
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700">Name</label>
-                            <Input
-                                type="text"
-                                value={formData.name}
-                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                required
-                            />
-                        </div>
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700">Email</label>
-                            <Input
-                                type="email"
-                                value={formData.email}
-                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                required
-                            />
-                        </div>
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700">Role</label>
-                            <Input
-                                type="text"
-                                value={formData.role}
-                                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                                required
-                            />
-                        </div>
-                        <div className="flex justify-end">
-                            <Button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white">
-                                Update User
-                            </Button>
-                        </div>
-                    </form>
-                    <DialogClose className="absolute right-4 top-4">
-                        <span className="sr-only">Close</span>
-                    </DialogClose>
-                </DialogContent>
-            </Dialog>
         </div>
     );
 }
