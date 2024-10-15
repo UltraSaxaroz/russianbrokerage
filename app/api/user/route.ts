@@ -1,8 +1,10 @@
-// app/api/user/route.ts
 import clientPromise from '@/lib/mongodb';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { NextRequest, NextResponse } from 'next/server';
 import { ObjectId } from 'mongodb';
+
+// Получить всех пользователей с возможностью фильтрации по имени
+// app/api/user/route.ts
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
     const token = request.headers.get('authorization')?.split(' ')[1];
@@ -22,16 +24,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     const client = await clientPromise;
-    const db = client.db(); // Убедитесь, что имя базы данных правильное
+    const db = client.db();
 
     try {
-        const user = await db.collection('users').findOne({ email: decoded.email });
-        if (!user) {
-            return NextResponse.json({ message: 'User not found' }, { status: 404 });
-        }
-
-        // Верните данные пользователя в формате массива
-        return NextResponse.json({ data: [{ _id: user._id.toString(), name: user.name, email: user.email }] }, { status: 200 });
+        // Получаем всех пользователей
+        const users = await db.collection('users').find({}).toArray();
+        return NextResponse.json({ data: users.map(user => ({ _id: user._id.toString(), name: user.name, email: user.email, role: user.role })) }, { status: 200 });
     } catch (err) {
         console.error(err);
         return NextResponse.json({ message: 'Server error' }, { status: 500 });
@@ -39,6 +37,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 }
 
 // Добавьте новый метод для обновления пользователя
+// app/api/user/route.ts
+
 export async function PATCH(request: NextRequest): Promise<NextResponse> {
     const token = request.headers.get('authorization')?.split(' ')[1];
     if (!token) {
@@ -57,14 +57,14 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
     }
 
     const client = await clientPromise;
-    const db = client.db(); // Убедитесь, что имя базы данных правильное
+    const db = client.db();
 
-    const { _id, name, email } = await request.json();
+    const { _id, name, email, role } = await request.json(); // Добавьте role в деструктуризацию
 
     try {
         const result = await db.collection('users').updateOne(
             { _id: new ObjectId(_id) },
-            { $set: { name, email } }
+            { $set: { name, email, role } } // Добавьте role в обновление
         );
 
         if (result.modifiedCount === 0) {
