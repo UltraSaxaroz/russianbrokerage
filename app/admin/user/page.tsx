@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -64,7 +64,7 @@ export default function Page() {
         try {
             const token = localStorage.getItem('token');
             const res = await fetch('/api/user', {
-                method: 'PUT',
+                method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
