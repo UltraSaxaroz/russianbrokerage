@@ -17,10 +17,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         return new NextResponse(JSON.stringify({ message: 'User already exists' }), { status: 400 });
     }
 
+    // Добавление роли по умолчанию
     await db.collection('users').insertOne({
         email,
         name,
         password: hashedPassword,
+        role: 'user', // добавляем роль по умолчанию
     });
 
     return new NextResponse(JSON.stringify({ message: 'User created successfully' }), { status: 201 });
