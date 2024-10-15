@@ -1,18 +1,53 @@
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { ChevronLeft, ChevronRight, Search, UserPlus } from "lucide-react"
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
+'use client'
+
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ChevronLeft, ChevronRight, Search, UserPlus } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function Page() {
-    const users = [
-        { id: 1, name: "Alice Johnson", email: "alice@example.com", role: "Admin", avatarUrl: "/placeholder.svg?height=32&width=32" },
-        { id: 2, name: "Bob Smith", email: "bob@example.com", role: "User", avatarUrl: "/placeholder.svg?height=32&width=32" },
-        { id: 3, name: "Charlie Brown", email: "charlie@example.com", role: "Editor", avatarUrl: "/placeholder.svg?height=32&width=32" },
-        { id: 4, name: "Diana Ross", email: "diana@example.com", role: "User", avatarUrl: "/placeholder.svg?height=32&width=32" },
-        { id: 5, name: "Edward Norton", email: "edward@example.com", role: "Admin", avatarUrl: "/placeholder.svg?height=32&width=32" },
-    ]
+    const [users, setUsers] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            setLoading(true);
+            setError(null);
+
+            try {
+                const token = localStorage.getItem('token'); // Предположим, что токен хранится в localStorage
+                const res = await fetch('/api/user', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!res.ok) {
+                    throw new Error('Failed to fetch users');
+                }
+
+                const data = await res.json();
+                setUsers(data.data || []);
+            } catch (error: any) {
+                setError(error.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchUsers();
+    }, []);
+
+    if (loading) {
+        return <div>Loading users...</div>;
+    }
+
+    if (error) {
+        return <div>Error: {error}</div>;
+    }
 
     return (
         <div className="container mx-auto p-4 bg-gray-100 min-h-screen">
@@ -42,18 +77,18 @@ export default function Page() {
                     </TableHeader>
                     <TableBody>
                         {users.map((user) => (
-                            <TableRow key={user.id}>
+                            <TableRow key={user._id}>
                                 <TableCell className="font-medium">
                                     <div className="flex items-center">
                                         <Avatar className="h-8 w-8 mr-2">
-                                            <AvatarImage src={user.avatarUrl} alt={user.name} />
+                                            <AvatarImage src={user.avatarUrl || "/placeholder.svg?height=32&width=32"} alt={user.name} />
                                             <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                                         </Avatar>
                                         {user.name}
                                     </div>
                                 </TableCell>
                                 <TableCell>{user.email}</TableCell>
-                                <TableCell>{user.role}</TableCell>
+                                <TableCell>{user.role || "User"}</TableCell>
                                 <TableCell className="text-right">
                                     <Button variant="ghost" className="text-blue-500 hover:text-blue-600">
                                         Edit
@@ -64,7 +99,7 @@ export default function Page() {
                     </TableBody>
                 </Table>
                 <div className="flex items-center justify-between mt-4">
-                    <p className="text-sm text-gray-600">Showing 5 of 20 users</p>
+                    <p className="text-sm text-gray-600">Showing {users.length} of 20 users</p>
                     <div className="flex items-center space-x-2">
                         <Button variant="outline" size="icon">
                             <ChevronLeft className="h-4 w-4" />
@@ -76,5 +111,5 @@ export default function Page() {
                 </div>
             </div>
         </div>
-    )
+    );
 }

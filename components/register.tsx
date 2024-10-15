@@ -42,9 +42,7 @@ const Register = () => {
 
             const data = await res.json()
 
-            if (res.ok) {
-                router.push('/panel')
-            } else {
+            if (!res.ok) {
                 setError(data.message || 'An error occurred')
             }
         } catch (error) {
