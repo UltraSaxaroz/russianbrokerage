@@ -35,7 +35,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             data: [{
                 _id: user._id.toString(),
                 name: user.name,
-                email: user.email
+                email: user.email,
+                role: user.role,
             }]
         }, {status: 200});
     } catch (err) {
