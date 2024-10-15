@@ -23,7 +23,5 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         password: hashedPassword,
     });
 
-
-
     return new NextResponse(JSON.stringify({ message: 'User created successfully' }), { status: 201 });
 }

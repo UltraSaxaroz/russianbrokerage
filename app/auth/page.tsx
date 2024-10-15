@@ -40,12 +40,11 @@ export default function Component() {
             <div className="absolute -bottom-8 left-20 w-64 h-64 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-md relative z-10">
-                <TabsList className="grid w-full grid-cols-2 mb-4">
-                    <TabsTrigger value="login">Вход</TabsTrigger>
-                    <TabsTrigger value="register">Регистрация</TabsTrigger>
-                </TabsList>
+                {/*<TabsList className="w-full mb-4">*/}
+                    {/*<TabsTrigger className={'w-full'} value="login">Вход</TabsTrigger>*/}
+                {/*</TabsList>*/}
                 <Login />
-                <Register />
+                {/*<Register />*/}
             </Tabs>
         </div>
     )
