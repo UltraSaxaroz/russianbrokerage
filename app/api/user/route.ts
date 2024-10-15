@@ -30,7 +30,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
         // Преобразуем данные пользователей
         const userData = users.map(user => ({
-            _id: user._id.toString(),
+            _id: (user._id as ObjectId).toString(),
             name: user.name,
             email: user.email,
             role: user.role,
