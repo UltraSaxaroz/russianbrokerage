@@ -22,7 +22,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 
-export default function Page() {
+export default function Component() {
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -232,7 +232,6 @@ export default function Page() {
                 </div>
             </div>
 
-            {/* Модальное окно для редактирования пользователя */}
             <Dialog open={showModal} onOpenChange={setShowModal}>
                 <DialogOverlay />
                 <DialogContent>
