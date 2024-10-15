@@ -4,6 +4,13 @@ import jwt, {JwtPayload} from 'jsonwebtoken';
 import {NextRequest, NextResponse} from 'next/server';
 import {ObjectId} from "mongodb";
 
+interface User {
+    _id: ObjectId;
+    name: string;
+    email: string;
+    role: string;
+}
+
 export async function GET(request: NextRequest): Promise<NextResponse> {
     const token = request.headers.get('authorization')?.split(' ')[1];
     if (!token) {
@@ -26,20 +33,27 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     try {
         // Получаем всех пользователей
-        const users = await db.collection('users').find({}).toArray();
+        const users = await db.collection<User>('users').find({}).toArray();
 
         // Преобразуем данные пользователей
-        const userData = users.map(user => ({
-            _id: (user._id as ObjectId).toString(),
-            name: user.name,
-            email: user.email,
-            role: user.role,
-        }));
+        const userData = users.map(user => {
+            try {
+                return {
+                    _id: user._id.toString(),
+                    name: user.name || '',
+                    email: user.email || '',
+                    role: user.role || '',
+                };
+            } catch (error) {
+                console.error('Error processing user:', user, error);
+                return null;
+            }
+        }).filter(user => user !== null);
 
         // Возвращаем массив всех пользователей
         return NextResponse.json({ data: userData }, { status: 200 });
     } catch (err) {
-        console.error(err);
+        console.error('Error fetching users:', err);
         return NextResponse.json({message: 'Server error'}, {status: 500});
     }
 }
