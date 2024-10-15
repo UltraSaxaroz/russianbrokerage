@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation'
 export default function Page() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    const [username, setUsername] = useState('')
+    const [name, setName] = useState('')
     const [error, setError] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const router = useRouter()
@@ -39,14 +39,12 @@ export default function Page() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, email, password }),
+                body: JSON.stringify({ name, email, password }),
             })
 
             const data = await res.json()
 
-            if (res.ok) {
-                router.push('/panel')
-            } else {
+            if (!res.ok) {
                 setError(data.message || 'An error occurred')
             }
         } catch (error) {
@@ -73,8 +71,8 @@ export default function Page() {
                             <Input
                                 id="username"
                                 placeholder="Enter username"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
                                 required
                             />
                         </div>
