@@ -78,7 +78,7 @@ export default function Page() {
             if (!res.ok) {
                 throw new Error('Failed to update user');
             }
-
+            console.log('Sending data:', { _id: editUser._id, ...formData });
             // Обновляем данные после успешного запроса
             setUsers(prevUsers =>
                 prevUsers.map(user =>
