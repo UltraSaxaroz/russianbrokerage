@@ -22,10 +22,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     const token = jwt.sign(
-        { id: user._id, email: user.email },
+        { id: user._id, email: user.email, role: user.role },
         process.env.JWT_SECRET!,
         { expiresIn: '240h' }
     );
 
-    return new NextResponse(JSON.stringify({ token }), { status: 200 });
+    const response = new NextResponse(JSON.stringify({ token }), { status: 200 });
+    response.cookies.set('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 240 * 60 * 60, // 240 часов в секундах
+        path: '/',
+    });
+    return response;
+
+    // return new NextResponse(JSON.stringify({ token }), { status: 200 });
 }
