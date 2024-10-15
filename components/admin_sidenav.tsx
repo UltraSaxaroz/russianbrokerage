@@ -1,14 +1,14 @@
 "use client"
 
 import {useState} from "react"
-import {Home, Users, BarChart2, Settings, Menu, X} from "lucide-react"
+import {Home, Users, Menu, X, Truck} from "lucide-react"
 import {Button} from "@/components/ui/button"
 import Link from "next/link";
 
 const menuItems = [
     {icon: Home, label: "Register a user", url: '/admin/register'},
     {icon: Users, label: "Users", url: '/admin/user'},
-    {icon: Settings, label: "Users List", url: '/admin/list'},
+    {icon: Truck, label: "Add driver", url: '/admin/driver'},
 ]
 
 export default function AdminSide() {

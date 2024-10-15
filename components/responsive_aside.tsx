@@ -8,7 +8,6 @@ import { Home, BarChart2, User, HelpCircle, Bell, Search, Menu, LogOut, X } from
 
 const navItems = [
     { name: 'Main Panel', href: '/panel', icon: Home },
-    { name: 'Add info', href: '/panel/driver', icon: BarChart2 },
     { name: 'Profile', href: '/panel/profile', icon: User },
     { name: 'Help', href: '/help', icon: HelpCircle },
 ]
