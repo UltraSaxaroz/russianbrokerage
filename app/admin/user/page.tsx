@@ -1,11 +1,18 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChevronLeft, ChevronRight, Search, UserPlus } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
+import { ChevronLeft, ChevronRight, Search, UserPlus } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
     Dialog,
     DialogTrigger,
@@ -13,10 +20,9 @@ import {
     DialogOverlay,
     DialogClose,
     DialogTitle,
-    DialogDescription,
-} from "@/components/ui/dialog"; // Импортируем компоненты из ShadCN
+} from '@/components/ui/dialog';
 
-export default function Page() {
+export default function Component() {
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -33,8 +39,8 @@ export default function Page() {
                 const token = localStorage.getItem('token');
                 const res = await fetch('/api/user', {
                     headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                        Authorization: `Bearer ${token}`,
+                    },
                 });
 
                 if (!res.ok) {
@@ -67,21 +73,27 @@ export default function Page() {
             const response = await fetch('/api/user', {
                 method: 'PATCH',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ _id: editUser._id, ...formData }),
             });
 
             if (!response.ok) {
-                throw new Error('Failed to update user');
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to update user');
             }
 
             const updatedUser = await response.json();
-            setUsers(users.map(user => user._id === updatedUser._id ? updatedUser : user));
+            setUsers((prevUsers) =>
+                prevUsers.map((user) =>
+                    user._id === updatedUser.data[0]._id ? updatedUser.data[0] : user
+                )
+            );
             setShowModal(false);
         } catch (error: any) {
             console.error('Error updating user:', error);
+            setError(error.message);
         }
     };
 
@@ -109,35 +121,50 @@ export default function Page() {
                             <DialogTitle>Add New User</DialogTitle>
                             <form onSubmit={handleFormSubmit}>
                                 <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700">Name</label>
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Name
+                                    </label>
                                     <Input
                                         type="text"
                                         value={formData.name}
-                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                        onChange={(e) =>
+                                            setFormData({ ...formData, name: e.target.value })
+                                        }
                                         required
                                     />
                                 </div>
                                 <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700">Email</label>
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Email
+                                    </label>
                                     <Input
                                         type="email"
                                         value={formData.email}
-                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        onChange={(e) =>
+                                            setFormData({ ...formData, email: e.target.value })
+                                        }
                                         required
                                     />
                                 </div>
                                 <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700">Role</label>
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Role
+                                    </label>
                                     <Input
                                         type="text"
                                         value={formData.role}
-                                        onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                                        onChange={(e) =>
+                                            setFormData({ ...formData, role: e.target.value })
+                                        }
                                         required
                                     />
                                 </div>
                                 <div className="flex justify-end">
-                                    <Button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white">
-                                        Update User
+                                    <Button
+                                        type="submit"
+                                        className="bg-blue-500 hover:bg-blue-600 text-white"
+                                    >
+                                        Add User
                                     </Button>
                                 </div>
                             </form>
@@ -148,10 +175,7 @@ export default function Page() {
                     </Dialog>
                 </div>
                 <div className="mb-4 relative">
-                    <Input
-                        className="pl-10"
-                        placeholder="Search users..."
-                    />
+                    <Input className="pl-10" placeholder="Search users..." />
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                 </div>
                 <Table>
@@ -169,15 +193,17 @@ export default function Page() {
                                 <TableCell className="font-medium">
                                     <div className="flex items-center">
                                         <Avatar className="h-8 w-8 mr-2">
-                                            <AvatarImage src={user.avatarUrl || "/placeholder.svg?height=32&width=32"} alt={user.name} />
+                                            <AvatarImage
+                                                src={user.avatarUrl || '/placeholder.svg?height=32&width=32'}
+                                                alt={user.name}
+                                            />
                                             <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                                         </Avatar>
-
                                         {user.name}
                                     </div>
                                 </TableCell>
                                 <TableCell>{user.email}</TableCell>
-                                <TableCell>{user.role || "User"}</TableCell>
+                                <TableCell>{user.role || 'User'}</TableCell>
                                 <TableCell className="text-right">
                                     <Button
                                         variant="ghost"
@@ -192,7 +218,9 @@ export default function Page() {
                     </TableBody>
                 </Table>
                 <div className="flex items-center justify-between mt-4">
-                    <p className="text-sm text-gray-600">Showing {users.length} of {users.length} users</p>
+                    <p className="text-sm text-gray-600">
+                        Showing {users.length} of {users.length} users
+                    </p>
                     <div className="flex items-center space-x-2">
                         <Button variant="outline" size="icon">
                             <ChevronLeft className="h-4 w-4" />
@@ -204,7 +232,6 @@ export default function Page() {
                 </div>
             </div>
 
-            {/* Модальное окно для редактирования пользователя */}
             <Dialog open={showModal} onOpenChange={setShowModal}>
                 <DialogOverlay />
                 <DialogContent>
@@ -215,7 +242,9 @@ export default function Page() {
                             <Input
                                 type="text"
                                 value={formData.name}
-                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                onChange={(e) =>
+                                    setFormData({ ...formData, name: e.target.value })
+                                }
                                 required
                             />
                         </div>
@@ -224,7 +253,9 @@ export default function Page() {
                             <Input
                                 type="email"
                                 value={formData.email}
-                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                onChange={(e) =>
+                                    setFormData({ ...formData, email: e.target.value })
+                                }
                                 required
                             />
                         </div>
@@ -233,12 +264,17 @@ export default function Page() {
                             <Input
                                 type="text"
                                 value={formData.role}
-                                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                                onChange={(e) =>
+                                    setFormData({ ...formData, role: e.target.value })
+                                }
                                 required
                             />
                         </div>
                         <div className="flex justify-end">
-                            <Button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white">
+                            <Button
+                                type="submit"
+                                className="bg-blue-500 hover:bg-blue-600 text-white"
+                            >
                                 Update User
                             </Button>
                         </div>
