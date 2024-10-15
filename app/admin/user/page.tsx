@@ -18,6 +18,7 @@ export default function Page() {
     const [showModal, setShowModal] = useState(false); // Состояние для отображения модального окна
     const [formData, setFormData] = useState({name: '', email: '', role: ''});
     const {toast} = useToast(); // Для уведомлений
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -144,6 +145,8 @@ export default function Page() {
                     <Input
                         className="pl-10"
                         placeholder="Search users..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                     />
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5"/>
                 </div>
@@ -157,32 +160,34 @@ export default function Page() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {users.map((user) => (
-                            <TableRow key={user._id}>
-                                <TableCell className="font-medium">
-                                    <div className="flex items-center">
-                                        <Avatar className="h-8 w-8 mr-2">
-                                            <AvatarImage src={user.avatarUrl || "/placeholder.svg?height=32&width=32"}
-                                                         alt={user.name}/>
-                                            <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                                        </Avatar>
-                                        {user.name}
-                                    </div>
-                                </TableCell>
-                                <TableCell>{user.email}</TableCell>
-                                <TableCell>{user.role || "User"}</TableCell>
-                                <TableCell className="text-right flex items-center">
-                                    <Button variant="ghost" className="text-blue-500 hover:text-blue-600"
-                                            onClick={() => handleEditClick(user)}>
-                                        Edit
-                                    </Button>
-                                    <Button variant="ghost" className="text-blue-500 hover:text-blue-600"
-                                            onClick={() => handleDeleteClick(user._id)}>
-                                        <LucideX/>
-                                    </Button>
-                                </TableCell>
-                            </TableRow>
-                        ))}
+                        {users
+                            .filter((user) =>
+                                user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                user.email.toLowerCase().includes(searchQuery.toLowerCase())
+                            )
+                            .map((user) => (
+                                <TableRow key={user._id}>
+                                    <TableCell className="font-medium">
+                                        <div className="flex items-center">
+                                            <Avatar className="h-8 w-8 mr-2">
+                                                <AvatarImage src={user.avatarUrl || "/placeholder.svg?height=32&width=32"} alt={user.name} />
+                                                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                                            </Avatar>
+                                            {user.name}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>{user.email}</TableCell>
+                                    <TableCell>{user.role || "User"}</TableCell>
+                                    <TableCell className="text-right flex items-center">
+                                        <Button variant="ghost" className="text-blue-500 hover:text-blue-600" onClick={() => handleEditClick(user)}>
+                                            Edit
+                                        </Button>
+                                        <Button variant="ghost" className="text-blue-500 hover:text-blue-600" onClick={() => handleDeleteClick(user._id)}>
+                                            <LucideX />
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
                     </TableBody>
                 </Table>
                 <div className="flex items-center justify-between mt-4">
