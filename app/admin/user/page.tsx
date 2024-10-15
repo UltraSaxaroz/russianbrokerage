@@ -4,58 +4,50 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChevronLeft, ChevronRight, Search, UserPlus, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, UserPlus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-interface User {
-    _id: string;
-    name: string;
-    email: string;
-    role: 'user' | 'admin';
-}
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"; // Импорт для модального окна
+import { useToast} from "@/hooks/use-toast"; // Предположим, что используется Toast для уведомлений
 
 export default function Page() {
-    const [users, setUsers] = useState<User[]>([]);
+    const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [editUser, setEditUser] = useState<User | null>(null);
-    const [showModal, setShowModal] = useState(false);
-    const [formData, setFormData] = useState({ name: '', email: '', role: 'user' as 'user' | 'admin' });
-    const { toast } = useToast();
-
-    const fetchUsers = async () => {
-        setLoading(true);
-        setError(null);
-
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch('/api/user', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!res.ok) {
-                throw new Error('Failed to fetch users');
-            }
-
-            const data = await res.json();
-            setUsers(data.data || []);
-        } catch (error: any) {
-            setError(error.message);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const [editUser, setEditUser] = useState<any | null>(null); // Состояние для редактируемого пользователя
+    const [showModal, setShowModal] = useState(false); // Состояние для отображения модального окна
+    const [formData, setFormData] = useState({ name: '', email: '', role: '' });
+    const { toast } = useToast(); // Для уведомлений
 
     useEffect(() => {
+        const fetchUsers = async () => {
+            setLoading(true);
+            setError(null);
+
+            try {
+                const token = localStorage.getItem('token'); // Предположим, что токен хранится в localStorage
+                const res = await fetch('/api/user', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!res.ok) {
+                    throw new Error('Failed to fetch users');
+                }
+
+                const data = await res.json();
+                setUsers(data.data || []);
+            } catch (error: any) {
+                setError(error.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
         fetchUsers();
     }, []);
 
-    const handleEditClick = (user: User) => {
+    const handleEditClick = (user: any) => {
         setEditUser(user);
         setFormData({ name: user.name, email: user.email, role: user.role });
         setShowModal(true);
@@ -66,17 +58,13 @@ export default function Page() {
         setFormData(prevData => ({ ...prevData, [name]: value }));
     };
 
-    const handleRoleChange = (value: 'user' | 'admin') => {
-        setFormData(prevData => ({ ...prevData, role: value }));
-    };
-
     const handleSave = async () => {
         if (!editUser) return;
 
         try {
             const token = localStorage.getItem('token');
             const res = await fetch('/api/user', {
-                method: 'PATCH',
+                method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
@@ -91,6 +79,7 @@ export default function Page() {
                 throw new Error('Failed to update user');
             }
 
+            // Обновляем данные после успешного запроса
             setUsers(prevUsers =>
                 prevUsers.map(user =>
                     user._id === editUser._id ? { ...user, ...formData } : user
@@ -101,29 +90,6 @@ export default function Page() {
             toast({ description: 'User updated successfully!' });
         } catch (error) {
             toast({ description: 'Failed to update user', variant: 'destructive' });
-        }
-    };
-
-    const handleDelete = async (userId: string) => {
-        if (!confirm('Are you sure you want to delete this user?')) return;
-
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(`/api/user/${userId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            if (!res.ok) {
-                throw new Error('Failed to delete user');
-            }
-
-            setUsers(prevUsers => prevUsers.filter(user => user._id !== userId));
-            toast({ description: 'User deleted successfully!' });
-        } catch (error) {
-            toast({ description: 'Failed to delete user', variant: 'destructive' });
         }
     };
 
@@ -167,20 +133,17 @@ export default function Page() {
                                 <TableCell className="font-medium">
                                     <div className="flex items-center">
                                         <Avatar className="h-8 w-8 mr-2">
-                                            <AvatarImage src={"/placeholder.svg?height=32&width=32"} alt={user.name} />
+                                            <AvatarImage src={user.avatarUrl || "/placeholder.svg?height=32&width=32"} alt={user.name} />
                                             <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                                         </Avatar>
                                         {user.name}
                                     </div>
                                 </TableCell>
                                 <TableCell>{user.email}</TableCell>
-                                <TableCell>{user.role}</TableCell>
+                                <TableCell>{user.role || "User"}</TableCell>
                                 <TableCell className="text-right">
-                                    <Button variant="ghost" className="text-blue-500 hover:text-blue-600 mr-2" onClick={() => handleEditClick(user)}>
+                                    <Button variant="ghost" className="text-blue-500 hover:text-blue-600" onClick={() => handleEditClick(user)}>
                                         Edit
-                                    </Button>
-                                    <Button variant="ghost" className="text-red-500 hover:text-red-600" onClick={() => handleDelete(user._id)}>
-                                        <Trash2 className="h-4 w-4" />
                                     </Button>
                                 </TableCell>
                             </TableRow>
@@ -188,7 +151,7 @@ export default function Page() {
                     </TableBody>
                 </Table>
                 <div className="flex items-center justify-between mt-4">
-                    <p className="text-sm text-gray-600">Showing {users.length} of {users.length} users</p>
+                    <p className="text-sm text-gray-600">Showing {users.length} of 20 users</p>
                     <div className="flex items-center space-x-2">
                         <Button variant="outline" size="icon">
                             <ChevronLeft className="h-4 w-4" />
@@ -200,40 +163,40 @@ export default function Page() {
                 </div>
             </div>
 
-            <Dialog open={showModal} onOpenChange={setShowModal}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Edit User</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                        <Input
-                            name="name"
-                            value={formData.name}
-                            onChange={handleInputChange}
-                            placeholder="Name"
-                        />
-                        <Input
-                            name="email"
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            placeholder="Email"
-                        />
-                        <Select value={formData.role} onValueChange={handleRoleChange}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select a role" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="user">User</SelectItem>
-                                <SelectItem value="admin">Admin</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <DialogFooter>
-                        <Button onClick={() => setShowModal(false)}>Cancel</Button>
-                        <Button onClick={handleSave} className="bg-blue-500 text-white">Save</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            {/* Модальное окно для редактирования пользователя */}
+            {showModal && (
+                <Dialog open={showModal} onOpenChange={setShowModal}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Edit User</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                            <Input
+                                name="name"
+                                value={formData.name}
+                                onChange={handleInputChange}
+                                placeholder="Name"
+                            />
+                            <Input
+                                name="email"
+                                value={formData.email}
+                                onChange={handleInputChange}
+                                placeholder="Email"
+                            />
+                            <Input
+                                name="role"
+                                value={formData.role}
+                                onChange={handleInputChange}
+                                placeholder="Role"
+                            />
+                        </div>
+                        <DialogFooter>
+                            <Button onClick={() => setShowModal(false)}>Cancel</Button>
+                            <Button onClick={handleSave} className="bg-blue-500 text-white">Save</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            )}
         </div>
     );
 }
