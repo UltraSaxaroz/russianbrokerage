@@ -66,25 +66,11 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
 
     try {
         const {id, name, email, role} = await request.json();
-        console.log('Request body:', {id, name, email, role}); // Логируем полученные данные
 
-        if (!ObjectId.isValid(id)) {
-            return NextResponse.json({message: 'Invalid ID'}, {status: 400});
-        }
-
-        const user = await db.collection('users').findOne({_id: new ObjectId(id)});
-        if (!user) {
-            return NextResponse.json({message: 'User not found'}, {status: 404});
-        }
-
-        const result = await db.collection('users').updateOne(
-            {_id: new ObjectId(id)},
+        await db.collection('users').updateOne(
+            {_id: new ObjectId(id)},  // Проверяем принадлежность данных пользователю
             {$set: {name, email, role}}
         );
-
-        if (result.modifiedCount === 0) {
-            return NextResponse.json({message: 'No documents were updated'}, {status: 404});
-        }
 
         return NextResponse.json({message: 'Driver updated successfully'}, {status: 200});
     } catch (err) {
