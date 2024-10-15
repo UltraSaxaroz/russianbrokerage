@@ -65,11 +65,11 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
     const db = client.db();
 
     try {
-        const {_id, name, email, role} = await request.json();
-
+        const { _id, name, email, role } = await request.json();
+        console.log(_id, name, email, role);
         await db.collection('users').updateOne(
             {_id: new ObjectId(_id)},  // Проверяем принадлежность данных пользователю
-            {$set: {_id, name, email, role}}
+            {$set: {name, email, role}}
         );
 
         return NextResponse.json({message: 'Driver updated successfully'}, {status: 200});
