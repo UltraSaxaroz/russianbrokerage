@@ -6,7 +6,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Edit, Trash2, Save, X, MapPin, Calendar, Package, Phone, User, Search } from "lucide-react"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Edit, Trash2, Save, X, MapPin, Calendar, Package, Phone, User, Search, ChevronDown, ChevronUp } from "lucide-react"
 import { Toaster } from "@/components/ui/toaster"
 import { useToast } from "@/hooks/use-toast"
 import { format } from "date-fns"
@@ -52,6 +53,7 @@ export default function DriverManagement() {
         locationFrom: '',
         locationTo: ''
     })
+    const [expandedDrivers, setExpandedDrivers] = useState<Set<string>>(new Set())
     const { toast } = useToast()
 
     const fetchData = useCallback(async () => {
@@ -197,14 +199,26 @@ export default function DriverManagement() {
         }
     }
 
+    const toggleDriverExpansion = (id: string) => {
+        setExpandedDrivers(prev => {
+            const newSet = new Set(prev)
+            if (newSet.has(id)) {
+                newSet.delete(id)
+            } else {
+                newSet.add(id)
+            }
+            return newSet
+        })
+    }
+
     return (
         <div className={`min-h-screen p-4 md:p-8 ${golos.className}`}>
             <div className="max-w-7xl mx-auto relative">
                 <h1 className="text-2xl md:text-4xl font-bold mb-4 md:mb-8 text-center text-black">Управление водителями</h1>
 
-                <div className="mb-4 md:mb-6 space-y-4 w-full">
-                    <div className="flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-4 w-full">
-                        <div className="relative flex-grow w-full">
+                <div className="mb-4 md:mb-6 space-y-4">
+                    <div className="flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-4">
+                        <div className="relative flex-grow w-full md:w-auto">
                             <Input
                                 type="text"
                                 placeholder="Поиск по имени, номеру или локации"
@@ -215,7 +229,7 @@ export default function DriverManagement() {
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                         </div>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                         <div className="flex flex-col space-y-1">
                             <Label htmlFor="weightFilter">Вес от:</Label>
                             <Input
@@ -258,135 +272,143 @@ export default function DriverManagement() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 auto-rows-fr">
-                    {filteredData.map((item) => {
-                        let formattedTime = isValidDate(item.time)
-                            ? format(new Date(item.time), 'PPP')
-                            : item.time
+                {filteredData.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                        {filteredData.map((item) => {
+                            let formattedTime = isValidDate(item.time)
+                                ? format(new Date(item.time), 'PPP')
+                                : item.time
 
-                        return (
-                            <Card key={item._id} className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden h-[400px]">
-                                <CardContent className="p-4 md:p-6 h-full flex flex-col justify-between overflow-y-auto">
-                                    {editingDriver && editingDriver._id === item._id ? (
-                                        <div className="space-y-4">
-                                            <Input
-                                                type="text"
-                                                name="fullName"
-                                                value={formData.fullName || ''}
-                                                onChange={handleInputChange}
-                                                onKeyDown={handleKeyDown}
-                                                placeholder="Полное имя"
-                                            />
-                                            <Input
-                                                type="text"
-                                                name="number"
-                                                value={formData.number || ''}
-                                                onChange={handleInputChange}
-                                                onKeyDown={handleKeyDown}
-                                                placeholder="Номер"
-                                            />
-                                            <Input
-                                                type="text"
-                                                name="time"
-                                                value={formData.time || ''}
-                                                onChange={handleInputChange}
-                                                onKeyDown={handleKeyDown}
-                                                placeholder="Время"
-                                            />
-                                            <Input
-                                                type="text"
-                                                name="weight"
-                                                value={formData.weight || ''}
-                                                onChange={handleInputChange}
-                                                onKeyDown={handleKeyDown}
-                                                placeholder="Вес"
-                                            />
-                                            <Input
-                                                type="text"
-                                                name="locationFrom"
-                                                value={formData.locationFrom || ''}
-                                                onChange={handleInputChange}
-                                                onKeyDown={handleKeyDown}
-                                                placeholder="Откуда"
-                                            />
-                                            <Input
-                                                type="text"
-                                                name="locationTo"
-                                                value={formData.locationTo || ''}
-                                                onChange={handleInputChange}
-                                                onKeyDown={handleKeyDown}
-                                                placeholder="Куда"
-                                            />
-                                            <Input
-                                                type="text"
-                                                name="description"
-                                                value={formData.description || ''}
-                                                onChange={handleInputChange}
-                                                onKeyDown={handleKeyDown}
-                                                placeholder="Описание"
-                                            />
-                                            <div className="flex justify-end space-x-2 mt-4">
-                                                <Button variant="outline" size="sm" onClick={handleSaveEdit}>
-                                                    <Save className="h-4 w-4 mr-2" />
-                                                    Сохранить
-                                                </Button>
-                                                <Button variant="ghost" size="sm" onClick={() => setEditingDriver(null)}>
-                                                    <X className="h-4 w-4 mr-2" />
-                                                    Отмена
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <div className="flex items-center justify-between mb-4">
-                                                <div className="flex items-center space-x-3">
-                                                    <div className="bg-indigo-100 p-2 rounded-full">
-                                                        <User className="h-5 w-5 md:h-6 md:w-6 text-indigo-600" />
+                            return (
+                                <Collapsible key={item._id} open={expandedDrivers.has(item._id)} onOpenChange={() => toggleDriverExpansion(item._id)}>
+                                    <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+                                        <CardContent className="p-4 md:p-6">
+                                            <CollapsibleTrigger asChild>
+                                                <div className="flex items-center justify-between cursor-pointer">
+                                                    <div className="flex items-center space-x-3">
+                                                        <div className="bg-indigo-100 p-2 rounded-full">
+                                                            <User className="h-5 w-5 md:h-6 md:w-6 text-indigo-600" />
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="font-semibold text-base md:text-lg text-neutral-900">{item.fullName}</h3>
+                                                            <p className="text-xs md:text-sm text-gray-500">{item.description}</p>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <h3 className="font-semibold text-base md:text-lg text-neutral-900">{item.fullName}</h3>
-                                                        <p className="text-xs md:text-sm text-gray-500">{item.description}</p>
+                                                    {expandedDrivers.has(item._id) ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                                                </div>
+                                            </CollapsibleTrigger>
+                                            <CollapsibleContent>
+                                                {editingDriver && editingDriver._id === item._id ? (
+                                                    <div className="space-y-4 mt-4">
+                                                        <Input
+                                                            type="text"
+                                                            name="fullName"
+                                                            value={formData.fullName || ''}
+                                                            onChange={handleInputChange}
+                                                            onKeyDown={handleKeyDown}
+                                                            placeholder="Полное имя"
+                                                        />
+                                                        <Input
+                                                            type="text"
+                                                            name="number"
+                                                            value={formData.number || ''}
+                                                            onChange={handleInputChange}
+                                                            onKeyDown={handleKeyDown}
+                                                            placeholder="Номер"
+                                                        />
+                                                        <Input
+                                                            type="text"
+                                                            name="time"
+                                                            value={formData.time || ''}
+                                                            onChange={handleInputChange}
+                                                            onKeyDown={handleKeyDown}
+                                                            placeholder="Время"
+                                                        />
+                                                        <Input
+                                                            type="text"
+                                                            name="weight"
+                                                            value={formData.weight || ''}
+                                                            onChange={handleInputChange}
+                                                            onKeyDown={handleKeyDown}
+                                                            placeholder="Вес"
+                                                        />
+                                                        <Input
+                                                            type="text"
+                                                            name="locationFrom"
+                                                            value={formData.locationFrom || ''}
+                                                            onChange={handleInputChange}
+                                                            onKeyDown={handleKeyDown}
+                                                            placeholder="Откуда"
+                                                        />
+                                                        <Input
+                                                            type="text"
+                                                            name="locationTo"
+                                                            value={formData.locationTo || ''}
+                                                            onChange={handleInputChange}
+                                                            onKeyDown={handleKeyDown}
+                                                            placeholder="Куда"
+                                                        />
+                                                        <Input
+                                                            type="text"
+                                                            name="description"
+                                                            value={formData.description || ''}
+                                                            onChange={handleInputChange}
+                                                            onKeyDown={handleKeyDown}
+                                                            placeholder="Описание"
+                                                        />
+                                                        <div className="flex justify-end space-x-2 mt-4">
+                                                            <Button variant="outline" size="sm" onClick={handleSaveEdit}>
+                                                                <Save className="h-4 w-4 mr-2" />
+                                                                Сохранить
+                                                            </Button>
+                                                            <Button variant="ghost" size="sm" onClick={() => setEditingDriver(null)}>
+                                                                <X className="h-4 w-4 mr-2" />
+                                                                Отмена
+                                                            </Button>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-4 text-sm">
-                                                <div className="flex items-center space-x-2">
-                                                    <Phone className="h-4 w-4 text-indigo-500" />
-                                                    <span>{item.number}</span>
-                                                </div>
-                                                <div className="flex items-center space-x-2">
-                                                    <Calendar className="h-4 w-4 text-indigo-500" />
-                                                    <span>{formattedTime}</span>
-                                                </div>
-                                                <div className="flex items-center space-x-2">
-                                                    <Package className="h-4 w-4 text-indigo-500" />
-                                                    <span>{item.weight}</span>
-                                                </div>
-                                                <div className="flex items-center space-x-2">
-                                                    <MapPin className="h-4 w-4 text-indigo-500" />
-                                                    <span>{item.locationFrom} → {item.locationTo}</span>
-                                                </div>
-                                            </div>
-                                            <div className="flex justify-end space-x-2 mt-auto pt-4">
-                                                <Button variant="ghost"
-                                                        size="sm" onClick={() => handleEdit(item)}>
-                                                    <Edit className="h-4 w-4 mr-2" />
-                                                    Редактировать
-                                                </Button>
-                                                <Button variant="ghost" size="sm" onClick={() => handleDelete(item._id)}>
-                                                    <Trash2 className="h-4 w-4 mr-2" />
-                                                    Удалить
-                                                </Button>
-                                            </div>
-                                        </>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        )
-                    })}
-                </div>
-                {filteredData.length === 0 && (
-                    <p className="text-center text-indigo-600 text-lg mt-4">Нет доступных данных</p>
+                                                ) : (
+                                                    <>
+
+                                                        <div className="grid grid-cols-2 gap-4 text-sm mt-4">
+                                                            <div className="flex items-center space-x-2">
+                                                                <Phone className="h-4 w-4 text-indigo-500" />
+                                                                <span>{item.number}</span>
+                                                            </div>
+                                                            <div className="flex items-center space-x-2">
+                                                                <Calendar className="h-4 w-4 text-indigo-500" />
+                                                                <span>{formattedTime}</span>
+                                                            </div>
+                                                            <div className="flex items-center space-x-2">
+                                                                <Package className="h-4 w-4 text-indigo-500" />
+                                                                <span>{item.weight}</span>
+                                                            </div>
+                                                            <div className="flex items-center space-x-2">
+                                                                <MapPin className="h-4 w-4 text-indigo-500" />
+                                                                <span>{item.locationFrom} → {item.locationTo}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex justify-end space-x-2 mt-4">
+                                                            <Button variant="ghost" size="sm" onClick={() => handleEdit(item)}>
+                                                                <Edit className="h-4 w-4 mr-2" />
+                                                                Редактировать
+                                                            </Button>
+                                                            <Button variant="ghost" size="sm" onClick={() => handleDelete(item._id)}>
+                                                                <Trash2 className="h-4 w-4 mr-2" />
+                                                                Удалить
+                                                            </Button>
+                                                        </div>
+                                                    </>
+                                                )}
+                                            </CollapsibleContent>
+                                        </CardContent>
+                                    </Card>
+                                </Collapsible>
+                            )
+                        })}
+                    </div>
+                ) : (
+                    <p className="text-center text-indigo-600 text-lg">Нет доступных данных</p>
                 )}
                 <Toaster />
             </div>
