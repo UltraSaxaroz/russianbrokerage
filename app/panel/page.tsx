@@ -203,7 +203,7 @@ export default function DriverManagement() {
                 <h1 className="text-2xl md:text-4xl font-bold mb-4 md:mb-8 text-center text-black">Управление водителями</h1>
 
                 <div className="mb-4 md:mb-6 space-y-4 w-full">
-                    <div className="flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-4">
+                    <div className="flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-4 w-full">
                         <div className="relative flex-grow w-full">
                             <Input
                                 type="text"
@@ -215,7 +215,7 @@ export default function DriverManagement() {
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                         </div>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
                         <div className="flex flex-col space-y-1">
                             <Label htmlFor="weightFilter">Вес от:</Label>
                             <Input
@@ -258,15 +258,15 @@ export default function DriverManagement() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 auto-rows-fr">
                     {filteredData.map((item) => {
                         let formattedTime = isValidDate(item.time)
                             ? format(new Date(item.time), 'PPP')
                             : item.time
 
                         return (
-                            <Card key={item._id} className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
-                                <CardContent className="p-4 md:p-6 h-full flex flex-col justify-between">
+                            <Card key={item._id} className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden h-[400px]">
+                                <CardContent className="p-4 md:p-6 h-full flex flex-col justify-between overflow-y-auto">
                                     {editingDriver && editingDriver._id === item._id ? (
                                         <div className="space-y-4">
                                             <Input
@@ -367,7 +367,7 @@ export default function DriverManagement() {
                                                     <span>{item.locationFrom} → {item.locationTo}</span>
                                                 </div>
                                             </div>
-                                            <div className="flex justify-end space-x-2 mt-4">
+                                            <div className="flex justify-end space-x-2 mt-auto pt-4">
                                                 <Button variant="ghost"
                                                         size="sm" onClick={() => handleEdit(item)}>
                                                     <Edit className="h-4 w-4 mr-2" />
