@@ -58,7 +58,7 @@ export default function AsidePanel() {
                     className="fixed top-4 right-4 z-50 text-gray-600 hover:text-gray-800 transition-colors"
                     aria-label={isOpen ? "Close menu" : "Open menu"}
                 >
-                    {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                    {isOpen ? <div className={'bg-black rounded-md p-2 transition-all'}><X className="text-white w-6 h-6" /></div> : <Menu className="w-6 h-6" />}
                 </button>
             )}
 
@@ -68,7 +68,7 @@ export default function AsidePanel() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black bg-opacity-50 z-40"
+                        className="fixed inset-0 bg-black bg-opacity-50 z-30"
                         onClick={toggleMenu}
                     />
                 )}
@@ -129,7 +129,7 @@ export default function AsidePanel() {
                         )
                     })}
                 </nav>
-                <div className="p-4 sm:pb-4 sm:pt-4 pt-12 pb-12 border-t border-gray-200">
+                <div className="p-4 z-20 sm:pb-4 sm:pt-4 pt-12 pb-12 border-t border-gray-200">
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
