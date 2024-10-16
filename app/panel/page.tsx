@@ -267,7 +267,7 @@ export default function DriverManagement() {
 
                             return (
                                 <Card key={item._id} className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden w-full">
-                                    <CardContent className="p-4 md:p-6">
+                                    <CardContent className="p-4 md:p-6 min-w-[350px]">
                                         {editingDriver && editingDriver._id === item._id ? (
                                             <div className="space-y-4">
                                                 <Input
