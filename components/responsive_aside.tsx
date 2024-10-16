@@ -129,23 +129,7 @@ export default function AsidePanel() {
                         )
                     })}
                 </nav>
-                <div className="p-4 border-t border-gray-200">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center space-x-3">
-                            <img
-                                src="/placeholder.svg?height=32&width=32"
-                                alt="User avatar"
-                                className="w-8 h-8 rounded-full"
-                            />
-                            <div>
-                                <p className="text-sm font-medium">John Doe</p>
-                                <p className="text-xs text-gray-500">Admin</p>
-                            </div>
-                        </div>
-                        <button className="text-gray-500 hover:text-gray-700 transition-colors">
-                            <Bell className="w-4 h-4" />
-                        </button>
-                    </div>
+                <div className="p-4 sm:pb-4 sm:pt-4 pt-12 pb-12 border-t border-gray-200">
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -156,21 +140,6 @@ export default function AsidePanel() {
                         <span className="font-medium">Logout</span>
                     </motion.button>
                 </div>
-
-                <motion.svg
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="absolute bottom-0 left-0 w-full h-64 text-gray-200 opacity-25 pointer-events-none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 1440 320"
-                >
-                    <path
-                        fill="currentColor"
-                        fillOpacity="1"
-                        d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,133.3C672,139,768,181,864,181.3C960,181,1056,139,1152,122.7C1248,107,1344,117,1392,122.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
-                    ></path>
-                </motion.svg>
             </motion.aside>
         </div>
     )
