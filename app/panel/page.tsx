@@ -199,7 +199,7 @@ export default function DriverManagement() {
 
     return (
         <div className={`min-h-screen p-4 md:p-8 ${golos.className}`}>
-            <div className="max-w-7xl mx-auto relative">
+            <div className="max-w-[820px] mx-auto relative">
                 <h1 className="text-2xl md:text-4xl font-bold mb-4 md:mb-8 text-center text-black">Управление водителями</h1>
 
                 <div className="mb-4 md:mb-6 space-y-4">
