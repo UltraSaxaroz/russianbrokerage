@@ -5,7 +5,7 @@ import { golos } from "@/app/fonts/fonts";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Edit, Trash2, Save, X, Truck, MapPin, Calendar, Package, Phone, User } from "lucide-react";
+import { Edit, Trash2, Save, X, MapPin, Calendar, Package, Phone, User, Search } from "lucide-react";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -26,6 +26,13 @@ interface ApiResponse {
     data?: DriverData[];
 }
 
+interface FilterState {
+    name: string;
+    description: string;
+    location: string;
+    weight: string;
+}
+
 function isValidDate(dateString: string) {
     const date = new Date(dateString);
     return !isNaN(date.getTime());
@@ -33,8 +40,15 @@ function isValidDate(dateString: string) {
 
 export default function DriverPage() {
     const [data, setData] = useState<DriverData[]>([]);
+    const [filteredData, setFilteredData] = useState<DriverData[]>([]);
     const [editingDriver, setEditingDriver] = useState<DriverData | null>(null);
     const [formData, setFormData] = useState<Partial<DriverData>>({});
+    const [filters, setFilters] = useState<FilterState>({
+        name: '',
+        description: '',
+        location: '',
+        weight: '',
+    });
     const { toast } = useToast();
 
     const fetchData = async () => {
@@ -71,6 +85,17 @@ export default function DriverPage() {
     useEffect(() => {
         fetchData();
     }, []);
+
+    useEffect(() => {
+        const filtered = data.filter(item =>
+            item.fullName.toLowerCase().includes(filters.name.toLowerCase()) &&
+            item.description.toLowerCase().includes(filters.description.toLowerCase()) &&
+            (item.locationFrom.toLowerCase().includes(filters.location.toLowerCase()) ||
+                item.locationTo.toLowerCase().includes(filters.location.toLowerCase())) &&
+            item.weight.toLowerCase().includes(filters.weight.toLowerCase())
+        );
+        setFilteredData(filtered);
+    }, [data, filters]);
 
     const handleDelete = async (id: string) => {
         try {
@@ -150,6 +175,11 @@ export default function DriverPage() {
         setFormData(prev => ({...prev, [name]: value}));
     };
 
+    const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const {name, value} = e.target;
+        setFilters(prev => ({...prev, [name]: value}));
+    };
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             handleSaveEdit();
@@ -157,36 +187,68 @@ export default function DriverPage() {
     };
 
     return (
-        <div className={`min-h-screen p-8 ${golos.className}`}>
+        <div className={`min-h-screen p-4 lg:p-8 ${golos.className}`}>
             <div className="max-w-full mx-auto relative">
-                <h1 className="text-4xl font-bold mb-8 text-center text-black">Управление водителями</h1>
+                <h1 className="text-3xl lg:text-4xl font-bold mb-4 lg:mb-8 text-center text-black">Управление водителями</h1>
 
-                {/* SVG элементы для заполнения пустого пространства */}
-                <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-                    {[...Array(20)].map((_, i) => (
-                        <Truck
-                            key={i}
-                            size={48}
-                            className="absolute text-blue-200 opacity-20"
-                            style={{
-                                top: `${Math.random() * 100}%`,
-                                left: `${Math.random() * 100}%`,
-                                transform: `rotate(${Math.random() * 360}deg)`,
-                            }}
+                {/* Filter inputs in a grid layout */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div className="relative">
+                        <Input
+                            type="text"
+                            name="name"
+                            placeholder="Фильтр по имени..."
+                            value={filters.name}
+                            onChange={handleFilterChange}
+                            className="pl-10 pr-4 py-2 w-full"
                         />
-                    ))}
+                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    </div>
+                    <div className="relative">
+                        <Input
+                            type="text"
+                            name="description"
+                            placeholder="Фильтр по описанию..."
+                            value={filters.description}
+                            onChange={handleFilterChange}
+                            className="pl-10 pr-4 py-2 w-full"
+                        />
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    </div>
+                    <div className="relative">
+                        <Input
+                            type="text"
+                            name="location"
+                            placeholder="Фильтр по локации..."
+                            value={filters.location}
+                            onChange={handleFilterChange}
+                            className="pl-10 pr-4 py-2 w-full"
+                        />
+                        <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    </div>
+                    <div className="relative">
+                        <Input
+                            type="text"
+                            name="weight"
+                            placeholder="Фильтр по весу..."
+                            value={filters.weight}
+                            onChange={handleFilterChange}
+                            className="pl-10 pr-4 py-2 w-full"
+                        />
+                        <Package className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    </div>
                 </div>
 
-                {data.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {data.map((item) => {
+                {filteredData.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+                        {filteredData.map((item) => {
                             let formattedTime = isValidDate(item.time)
                                 ? format(new Date(item.time), 'PPP')
                                 : item.time;
 
                             return (
                                 <Card key={item._id} className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
-                                    <CardContent className="p-6">
+                                    <CardContent className="p-4 lg:p-6">
                                         {editingDriver && editingDriver._id === item._id ? (
                                             <div className="space-y-4">
                                                 <Input
@@ -261,11 +323,11 @@ export default function DriverPage() {
                                                 <div className="flex items-center justify-between mb-4">
                                                     <div className="flex items-center space-x-3">
                                                         <div className="bg-indigo-100 p-2 rounded-full">
-                                                            <User className="h-6 w-6 text-indigo-600" />
+                                                            <User className="h-5 w-5 lg:h-6 lg:w-6 text-indigo-600" />
                                                         </div>
                                                         <div>
-                                                            <h3 className="font-semibold text-lg text-neutral-900">{item.fullName}</h3>
-                                                            <p className="text-sm text-gray-500">{item.description}</p>
+                                                            <h3 className="font-semibold text-base lg:text-lg text-neutral-900">{item.fullName}</h3>
+                                                            <p className="text-xs lg:text-sm text-gray-500">{item.description}</p>
                                                         </div>
                                                     </div>
                                                     <div className="flex space-x-2">
@@ -277,21 +339,22 @@ export default function DriverPage() {
                                                         </Button>
                                                     </div>
                                                 </div>
-                                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                                <div className="grid grid-cols-2 gap-2 lg:gap-4 text-xs lg:text-sm">
                                                     <div className="flex items-center space-x-2">
-                                                        <Phone className="h-4 w-4 text-indigo-500" />
+                                                        <Phone className="h-3 w-3 lg:h-4 lg:w-4 text-indigo-500" />
                                                         <span>{item.number}</span>
                                                     </div>
                                                     <div className="flex items-center space-x-2">
-                                                        <Calendar className="h-4 w-4 text-indigo-500" />
+                                                        <Calendar className="h-3 w-3 lg:h-4 lg:w-4 text-indigo-500" />
                                                         <span>{formattedTime}</span>
                                                     </div>
                                                     <div className="flex items-center space-x-2">
-                                                        <Package className="h-4 w-4 text-indigo-500" />
+                                                        <Package className="h-3 w-3 lg:h-4 lg:w-4 text-indigo-500" />
                                                         <span>{item.weight}</span>
                                                     </div>
                                                     <div className="flex items-center space-x-2">
-                                                        <MapPin className="h-4 w-4 text-indigo-500" />
+                                                        <MapPin className="h-3 w-3 lg:h-4 lg:w-4 text-indigo-500" />
+
                                                         <span>{item.locationFrom} → {item.locationTo}</span>
                                                     </div>
                                                 </div>
