@@ -187,7 +187,7 @@ export default function DriverPage() {
     };
 
     return (
-        <div className={`min-h-screen p-4 lg:p-8 ${golos.className}`}>
+        <div className={`w-full min-h-screen p-4 lg:p-8 ${golos.className}`}>
             <div className="max-w-full mx-auto relative">
                 <h1 className="text-3xl lg:text-4xl font-bold mb-4 lg:mb-8 text-center text-black">Управление водителями</h1>
 
