@@ -92,7 +92,7 @@ export default function DriverPage() {
             item.description.toLowerCase().includes(filters.description.toLowerCase()) &&
             (item.locationFrom.toLowerCase().includes(filters.location.toLowerCase()) ||
                 item.locationTo.toLowerCase().includes(filters.location.toLowerCase())) &&
-            item.weight.toLowerCase().includes(filters.weight.toLowerCase())
+            (filters.weight === '' || parseFloat(item.weight) >= parseFloat(filters.weight))
         );
         setFilteredData(filtered);
     }, [data, filters]);
@@ -187,7 +187,7 @@ export default function DriverPage() {
     };
 
     return (
-        <div className={`w-full min-h-screen p-4 lg:p-8 ${golos.className}`}>
+        <div className={`min-h-screen p-4 lg:p-8 ${golos.className}`}>
             <div className="max-w-full mx-auto relative">
                 <h1 className="text-3xl lg:text-4xl font-bold mb-4 lg:mb-8 text-center text-black">Управление водителями</h1>
 
@@ -230,7 +230,7 @@ export default function DriverPage() {
                         <Input
                             type="text"
                             name="weight"
-                            placeholder="Фильтр по весу..."
+                            placeholder="Фильтр от веса..."
                             value={filters.weight}
                             onChange={handleFilterChange}
                             className="pl-10 pr-4 py-2 w-full"
@@ -354,7 +354,6 @@ export default function DriverPage() {
                                                     </div>
                                                     <div className="flex items-center space-x-2">
                                                         <MapPin className="h-3 w-3 lg:h-4 lg:w-4 text-indigo-500" />
-
                                                         <span>{item.locationFrom} → {item.locationTo}</span>
                                                     </div>
                                                 </div>
