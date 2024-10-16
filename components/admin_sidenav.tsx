@@ -32,7 +32,7 @@ export default function AdminSide() {
             >
                 <div className="flex h-full flex-col w-full">
                     <div className="flex items-center justify-center h-16 border-b">
-                        <h1 className="text-2xl font-bold text-gray-800">Logo</h1>
+                        <h1 className="text-2xl font-bold text-gray-800">TruckConnect</h1>
                     </div>
                     <nav className="flex-1 overflow-y-auto p-4">
                         <ul className="space-y-2">
