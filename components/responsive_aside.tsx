@@ -51,7 +51,7 @@ export default function AsidePanel() {
     }, [isOpen, isMobile])
 
     return (
-        <div className={''}>
+        <div className={'border-2 shadow-2xl'}>
             {isMobile && (
                 <button
                     onClick={toggleMenu}
