@@ -177,12 +177,11 @@ export default function Page() {
                                 )
                                 .map((user) => (
                                     <React.Fragment key={user._id}>
-                                        <TableRow>
+                                        <TableRow onClick={() => toggleRowExpansion(user._id)}>
                                             <TableCell>
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    onClick={() => toggleRowExpansion(user._id)}
                                                 >
                                                     {expandedRows.has(user._id) ? (
                                                         <ChevronUp className="h-4 w-4" />
