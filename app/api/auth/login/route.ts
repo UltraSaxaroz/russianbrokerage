@@ -27,6 +27,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         { expiresIn: '240h' }
     );
 
+    // Получаем IP-адрес пользователя
+    const userIp = request.headers.get('x-forwarded-for') || request.ip || 'Unknown';
+
+    // Пример сохранения IP-адреса в базе данных (если требуется)
+    await db.collection('user_logs').insertOne({
+        userId: user._id,
+        email: user.email,
+        loginTime: new Date(),
+        ipAddress: userIp,
+    });
+
     const response = new NextResponse(JSON.stringify({ token }), { status: 200 });
     response.cookies.set('token', token, {
         httpOnly: true,
@@ -36,6 +47,4 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         path: '/',
     });
     return response;
-
-    // return new NextResponse(JSON.stringify({ token }), { status: 200 });
 }
