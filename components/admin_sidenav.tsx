@@ -26,7 +26,7 @@ export default function AdminSide() {
     }, [])
 
     return (
-        <div className="flex h-screen overflow-hidden border shadow-2xl">
+        <div className="flex h-full min-h-screen overflow-hidden border shadow-2xl">
             <Button
                 variant="outline"
                 size="icon"
