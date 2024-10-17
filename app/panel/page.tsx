@@ -174,7 +174,7 @@ export default function DriverPage() {
 
                 {filteredData.length > 0 ? (
                     <>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 overflow-y-scroll">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
                             {filteredData.map((item) => {
                                 let formattedTime = isValidDate(item.time)
                                     ? format(new Date(item.time), 'PPP')

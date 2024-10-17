@@ -8,7 +8,7 @@ const Layout = ({children}: { children: ReactNode }) => {
             {/*<AsidePanel/>*/}
             <ResponsiveAside />
 
-            <div className="flex justify-center items-center w-full">
+            <div className="flex justify-center items-center w-full overflow-y-auto">
                 {children}
             </div>
         </div>
