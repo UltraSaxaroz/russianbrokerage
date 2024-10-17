@@ -65,7 +65,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     try {
         const page = parseInt(request.nextUrl.searchParams.get('page') || '1');
-        const limit = parseInt(request.nextUrl.searchParams.get('limit') || '10');
+        const limit = parseInt(request.nextUrl.searchParams.get('limit') || '9');
         const skip = (page - 1) * limit;
 
         const drivers = await db.collection('drivers')
