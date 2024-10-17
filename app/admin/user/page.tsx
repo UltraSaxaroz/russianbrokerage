@@ -144,11 +144,11 @@ export default function Page() {
     };
 
     if (loading) {
-        return <div className="flex justify-center items-center h-screen">Loading users...</div>;
+        return <div className="flex justify-center items-center w-full h-screen"><h1 className={'text-2xl font-semibold'}>Loading users...</h1></div>;
     }
 
     if (error) {
-        return <div className="flex justify-center items-center h-screen text-red-500">Error: {error}</div>;
+        return <div className="flex justify-center items-center w-full h-screen text-red-500"><h1 className={'text-2xl font-semibold'}>Error: {error}</h1></div>;
     }
 
     return (
