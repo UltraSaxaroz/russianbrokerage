@@ -51,7 +51,7 @@ export default function AsidePanel() {
     }, [isOpen, isMobile])
 
     return (
-        <div className={'border-2 shadow-2xl'}>
+        <>
             {isMobile && (
                 <button
                     onClick={toggleMenu}
@@ -78,7 +78,7 @@ export default function AsidePanel() {
                 initial={false}
                 animate={{ x: isOpen || !isMobile ? 0 : '-100%' }}
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="fixed top-0 left-0 w-64 h-full bg-gray-100 text-gray-800 flex flex-col z-50 lg:relative lg:translate-x-0 lg:w-72"
+                className="fixed top-0 left-0 w-64 h-full bg-gray-100 text-gray-800 flex flex-col z-40 shadow-2xl lg:w-72"
                 style={{ willChange: 'transform' }}
             >
                 <div className="p-4 flex items-center justify-between border-b border-gray-200">
@@ -141,6 +141,6 @@ export default function AsidePanel() {
                     </motion.button>
                 </div>
             </motion.aside>
-        </div>
+        </>
     )
 }
