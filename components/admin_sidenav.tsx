@@ -14,7 +14,6 @@ const menuItems = [
 export default function AdminSide() {
     const [isOpen, setIsOpen] = useState(false)
 
-    // Close sidebar when screen size changes to larger than md breakpoint
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth >= 768) {
@@ -26,7 +25,7 @@ export default function AdminSide() {
     }, [])
 
     return (
-        <>
+        <div className="flex h-screen overflow-hidden border shadow-2xl">
             <Button
                 variant="outline"
                 size="icon"
@@ -38,7 +37,7 @@ export default function AdminSide() {
             </Button>
 
             <aside
-                className={`fixed top-0 left-0 z-40 h-screen w-64 bg-white shadow-lg transition-transform duration-300 ease-in-out ${
+                className={`fixed md:static top-0 left-0 z-40 h-full w-64 bg-white shadow-lg transition-transform duration-300 ease-in-out ${
                     isOpen ? "translate-x-0" : "-translate-x-full"
                 } md:translate-x-0`}
             >
@@ -77,6 +76,6 @@ export default function AdminSide() {
                     aria-hidden="true"
                 />
             )}
-        </>
+        </div>
     )
 }
