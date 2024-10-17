@@ -6,10 +6,11 @@ const Layout = ({children}: { children: ReactNode }) => {
     return (
         <div className="flex w-full">
             {/*<AsidePanel/>*/}
-            <ResponsiveAside />
-            <div className="flex justify-center items-center w-full">
-                {children}
-            </div>
+            <ResponsiveAside>
+                <div className="flex justify-center items-center w-full">
+                    {children}
+                </div>
+            </ResponsiveAside>
         </div>
     );
 };
