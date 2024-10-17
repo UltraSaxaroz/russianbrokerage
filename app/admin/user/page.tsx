@@ -24,10 +24,6 @@ export default function Component() {
     const [pageSize, setPageSize] = useState(10);
     const [totalUsers, setTotalUsers] = useState(0);
 
-    useEffect(() => {
-        fetchUsers();
-    }, [currentPage, pageSize, searchQuery]);
-
     const fetchUsers = async () => {
         setLoading(true);
         setError(null);
@@ -53,6 +49,10 @@ export default function Component() {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchUsers();
+    }, [currentPage, pageSize, searchQuery]);
 
     const handleEditClick = (user: any) => {
         setEditUser(user);
@@ -86,7 +86,7 @@ export default function Component() {
                 throw new Error('Failed to update user');
             }
 
-            fetchUsers(); // Refresh the user list
+            await fetchUsers(); // Refresh the user list
             setShowModal(false);
             toast({description: 'User updated successfully!'});
         } catch (error) {
@@ -112,7 +112,7 @@ export default function Component() {
                 throw new Error('Failed to delete user');
             }
 
-            fetchUsers(); // Refresh the user list
+            await fetchUsers(); // Refresh the user list
             toast({ description: 'User deleted successfully!' });
         } catch (error) {
             toast({ description: 'Failed to delete user', variant: 'destructive' });
@@ -244,13 +244,13 @@ export default function Component() {
                             <ChevronLeft className="h-4 w-4"/>
                         </Button>
                         <span className="text-sm text-gray-600">
-                            Page {currentPage} of {totalPages}
+                            Page {currentPage} of {Math.ceil(totalUsers / pageSize)}
                         </span>
                         <Button
                             variant="outline"
                             size="icon"
                             onClick={() => handlePageChange(currentPage + 1)}
-                            disabled={currentPage === totalPages}
+                            disabled={currentPage === Math.ceil(totalUsers / pageSize)}
                         >
                             <ChevronRight className="h-4 w-4"/>
                         </Button>
