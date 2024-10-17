@@ -1,24 +1,25 @@
 'use client';
 
-import React, {useEffect, useState} from "react";
-import {Button} from "@/components/ui/button";
-import {Input} from "@/components/ui/input";
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {ChevronLeft, ChevronRight, LucideX, Search, UserPlus} from "lucide-react";
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
-import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter} from "@/components/ui/dialog"; // Импорт для модального окна
-import {useToast} from "@/hooks/use-toast";
-import Link from "next/link"; // Предположим, что используется Toast для уведомлений
+import React, { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp, LucideX, Search, UserPlus } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import Link from "next/link";
 
 export default function Page() {
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [editUser, setEditUser] = useState<any | null>(null); // Состояние для редактируемого пользователя
-    const [showModal, setShowModal] = useState(false); // Состояние для отображения модального окна
+    const [editUser, setEditUser] = useState<any | null>(null);
+    const [showModal, setShowModal] = useState(false);
     const [formData, setFormData] = useState({name: '', email: '', role: ''});
-    const {toast} = useToast(); // Для уведомлений
+    const { toast } = useToast();
     const [searchQuery, setSearchQuery] = useState('');
+    const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -26,7 +27,7 @@ export default function Page() {
             setError(null);
 
             try {
-                const token = localStorage.getItem('token'); // Предположим, что токен хранится в localStorage
+                const token = localStorage.getItem('token');
                 const res = await fetch('/api/user', {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -80,8 +81,6 @@ export default function Page() {
             if (!res.ok) {
                 throw new Error('Failed to update user');
             }
-            console.log('Sending data:', {_id: editUser._id, ...formData});
-            // Обновляем данные после успешного запроса
             setUsers(prevUsers =>
                 prevUsers.map(user =>
                     user._id === editUser._id ? {...user, ...formData} : user
@@ -113,7 +112,6 @@ export default function Page() {
                 throw new Error('Failed to delete user');
             }
 
-            // Update UI after deletion
             setUsers(prevUsers => prevUsers.filter(user => user._id !== userId));
             toast({ description: 'User deleted successfully!' });
         } catch (error) {
@@ -121,21 +119,33 @@ export default function Page() {
         }
     };
 
+    const toggleRowExpansion = (userId: string) => {
+        setExpandedRows(prevExpandedRows => {
+            const newExpandedRows = new Set(prevExpandedRows);
+            if (newExpandedRows.has(userId)) {
+                newExpandedRows.delete(userId);
+            } else {
+                newExpandedRows.add(userId);
+            }
+            return newExpandedRows;
+        });
+    };
+
     if (loading) {
-        return <div>Loading users...</div>;
+        return <div className="flex justify-center items-center h-screen">Loading users...</div>;
     }
 
     if (error) {
-        return <div>Error: {error}</div>;
+        return <div className="flex justify-center items-center h-screen text-red-500">Error: {error}</div>;
     }
 
     return (
         <div className="container mx-auto p-4 bg-gray-100 min-h-screen">
-            <div className="bg-white rounded-lg shadow-md p-6">
-                <div className="flex justify-between items-center mb-6">
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row justify-between items-center mb-6 space-y-4 sm:space-y-0">
                     <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
                     <Link href={"/admin/register"}>
-                        <Button className="bg-blue-500 hover:bg-blue-600 text-white">
+                        <Button className="bg-blue-500 hover:bg-blue-600 text-white w-full sm:w-auto">
                             <UserPlus className="mr-2 h-4 w-4"/>
                             Add New User
                         </Button>
@@ -150,47 +160,74 @@ export default function Page() {
                     />
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5"/>
                 </div>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>User</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Role</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {users
-                            .filter((user) =>
-                                user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                user.email.toLowerCase().includes(searchQuery.toLowerCase())
-                            )
-                            .map((user) => (
-                                <TableRow key={user._id}>
-                                    <TableCell className="font-medium">
-                                        <div className="flex items-center">
-                                            <Avatar className="h-8 w-8 mr-2">
-                                                <AvatarImage src={user.avatarUrl || "/placeholder.svg?height=32&width=32"} alt={user.name} />
-                                                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                                            </Avatar>
-                                            {user.name}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>{user.email}</TableCell>
-                                    <TableCell>{user.role || "User"}</TableCell>
-                                    <TableCell className="text-right flex items-center">
-                                        <Button variant="ghost" className="text-blue-500 hover:text-blue-600" onClick={() => handleEditClick(user)}>
-                                            Edit
-                                        </Button>
-                                        <Button variant="ghost" className="text-blue-500 hover:text-blue-600" onClick={() => handleDeleteClick(user._id)}>
-                                            <LucideX />
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                    </TableBody>
-                </Table>
-                <div className="flex items-center justify-between mt-4">
+                <div className="overflow-x-auto">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-12"></TableHead>
+                                <TableHead>User</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {users
+                                .filter((user) =>
+                                    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                    user.email.toLowerCase().includes(searchQuery.toLowerCase())
+                                )
+                                .map((user) => (
+                                    <React.Fragment key={user._id}>
+                                        <TableRow>
+                                            <TableCell>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => toggleRowExpansion(user._id)}
+                                                >
+                                                    {expandedRows.has(user._id) ? (
+                                                        <ChevronUp className="h-4 w-4" />
+                                                    ) : (
+                                                        <ChevronDown className="h-4 w-4" />
+                                                    )}
+                                                </Button>
+                                            </TableCell>
+                                            <TableCell className="font-medium">
+                                                <div className="flex items-center">
+                                                    <Avatar className="h-8 w-8 mr-2">
+                                                        <AvatarImage src={user.avatarUrl || "/placeholder.svg?height=32&width=32"} alt={user.name} />
+                                                        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                                                    </Avatar>
+                                                    <span>{user.name}</span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <div className="flex justify-end space-x-2">
+                                                    <Button variant="ghost" className="text-blue-500 hover:text-blue-600 p-1 sm:p-2" onClick={() => handleEditClick(user)}>
+                                                        Edit
+                                                    </Button>
+                                                    <Button variant="ghost" className="text-blue-500 hover:text-blue-600 p-1 sm:p-2" onClick={() => handleDeleteClick(user._id)}>
+                                                        <LucideX />
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                        {expandedRows.has(user._id) && (
+                                            <TableRow>
+                                                <TableCell colSpan={3}>
+                                                    <div className="p-4 bg-gray-50">
+                                                        <p><strong>Email:</strong> {user.email}</p>
+                                                        <p><strong>Role:</strong> {user.role || "User"}</p>
+                                                        {/* Add any other user details you want to display */}
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+                                    </React.Fragment>
+                                ))}
+                        </TableBody>
+                    </Table>
+                </div>
+                <div className="flex flex-col sm:flex-row items-center justify-between mt-4 space-y-4 sm:space-y-0">
                     <p className="text-sm text-gray-600">Showing {users.length} of 20 users</p>
                     <div className="flex items-center space-x-2">
                         <Button variant="outline" size="icon">
@@ -203,40 +240,37 @@ export default function Page() {
                 </div>
             </div>
 
-            {/* Модальное окно для редактирования пользователя */}
-            {showModal && (
-                <Dialog open={showModal} onOpenChange={setShowModal}>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Edit User</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                            <Input
-                                name="name"
-                                value={formData.name}
-                                onChange={handleInputChange}
-                                placeholder="Name"
-                            />
-                            <Input
-                                name="email"
-                                value={formData.email}
-                                onChange={handleInputChange}
-                                placeholder="Email"
-                            />
-                            <Input
-                                name="role"
-                                value={formData.role}
-                                onChange={handleInputChange}
-                                placeholder="Role"
-                            />
-                        </div>
-                        <DialogFooter>
-                            <Button onClick={() => setShowModal(false)}>Cancel</Button>
-                            <Button onClick={handleSave} className="bg-blue-500 text-white">Save</Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-            )}
+            <Dialog open={showModal} onOpenChange={setShowModal}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Edit User</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <Input
+                            name="name"
+                            value={formData.name}
+                            onChange={handleInputChange}
+                            placeholder="Name"
+                        />
+                        <Input
+                            name="email"
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            placeholder="Email"
+                        />
+                        <Input
+                            name="role"
+                            value={formData.role}
+                            onChange={handleInputChange}
+                            placeholder="Role"
+                        />
+                    </div>
+                    <DialogFooter>
+                        <Button onClick={() => setShowModal(false)}>Cancel</Button>
+                        <Button onClick={handleSave} className="bg-blue-500 text-white">Save</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
