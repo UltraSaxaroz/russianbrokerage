@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 
-export default function Page() {
+export default function Component() {
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -20,35 +20,39 @@ export default function Page() {
     const { toast } = useToast();
     const [searchQuery, setSearchQuery] = useState('');
     const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [totalUsers, setTotalUsers] = useState(0);
 
     useEffect(() => {
-        const fetchUsers = async () => {
-            setLoading(true);
-            setError(null);
-
-            try {
-                const token = localStorage.getItem('token');
-                const res = await fetch('/api/user', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (!res.ok) {
-                    throw new Error('Failed to fetch users');
-                }
-
-                const data = await res.json();
-                setUsers(data.data || []);
-            } catch (error: any) {
-                setError(error.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchUsers();
-    }, []);
+    }, [currentPage, pageSize, searchQuery]);
+
+    const fetchUsers = async () => {
+        setLoading(true);
+        setError(null);
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`/api/user?page=${currentPage}&pageSize=${pageSize}&search=${searchQuery}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!res.ok) {
+                throw new Error('Failed to fetch users');
+            }
+
+            const data = await res.json();
+            setUsers(data.users || []);
+            setTotalUsers(data.total || 0);
+        } catch (error: any) {
+            setError(error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleEditClick = (user: any) => {
         setEditUser(user);
@@ -81,12 +85,8 @@ export default function Page() {
             if (!res.ok) {
                 throw new Error('Failed to update user');
             }
-            setUsers(prevUsers =>
-                prevUsers.map(user =>
-                    user._id === editUser._id ? {...user, ...formData} : user
-                )
-            );
 
+            fetchUsers(); // Refresh the user list
             setShowModal(false);
             toast({description: 'User updated successfully!'});
         } catch (error) {
@@ -112,7 +112,7 @@ export default function Page() {
                 throw new Error('Failed to delete user');
             }
 
-            setUsers(prevUsers => prevUsers.filter(user => user._id !== userId));
+            fetchUsers(); // Refresh the user list
             toast({ description: 'User deleted successfully!' });
         } catch (error) {
             toast({ description: 'Failed to delete user', variant: 'destructive' });
@@ -130,6 +130,12 @@ export default function Page() {
             return newExpandedRows;
         });
     };
+
+    const handlePageChange = (newPage: number) => {
+        setCurrentPage(newPage);
+    };
+
+    const totalPages = Math.ceil(totalUsers / pageSize);
 
     if (loading) {
         return <div className="flex justify-center items-center h-screen">Loading users...</div>;
@@ -156,7 +162,10 @@ export default function Page() {
                         className="pl-10"
                         placeholder="Search users..."
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={(e) => {
+                            setSearchQuery(e.target.value);
+                            setCurrentPage(1); // Reset to first page on new search
+                        }}
                     />
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5"/>
                 </div>
@@ -170,70 +179,79 @@ export default function Page() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {users
-                                .filter((user) =>
-                                    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                    user.email.toLowerCase().includes(searchQuery.toLowerCase())
-                                )
-                                .map((user) => (
-                                    <React.Fragment key={user._id}>
-                                        <TableRow>
-                                            <TableCell>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => toggleRowExpansion(user._id)}
-                                                >
-                                                    {expandedRows.has(user._id) ? (
-                                                        <ChevronUp className="h-4 w-4" />
-                                                    ) : (
-                                                        <ChevronDown className="h-4 w-4" />
-                                                    )}
+                            {users.map((user) => (
+                                <React.Fragment key={user._id}>
+                                    <TableRow>
+                                        <TableCell>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => toggleRowExpansion(user._id)}
+                                            >
+                                                {expandedRows.has(user._id) ? (
+                                                    <ChevronUp className="h-4 w-4" />
+                                                ) : (
+                                                    <ChevronDown className="h-4 w-4" />
+                                                )}
+                                            </Button>
+                                        </TableCell>
+                                        <TableCell className="font-medium">
+                                            <div className="flex items-center">
+                                                <Avatar className="h-8 w-8 mr-2">
+                                                    <AvatarImage src={user.avatarUrl || "/placeholder.svg?height=32&width=32"} alt={user.name} />
+                                                    <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                                                </Avatar>
+                                                <span>{user.name}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <div className="flex justify-end space-x-2">
+                                                <Button variant="ghost" className="text-blue-500 hover:text-blue-600 p-1 sm:p-2" onClick={() => handleEditClick(user)}>
+                                                    Edit
                                                 </Button>
-                                            </TableCell>
-                                            <TableCell className="font-medium">
-                                                <div className="flex items-center">
-                                                    <Avatar className="h-8 w-8 mr-2">
-                                                        <AvatarImage src={user.avatarUrl || "/placeholder.svg?height=32&width=32"} alt={user.name} />
-                                                        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                                                    </Avatar>
-                                                    <span>{user.name}</span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className="text-right">
-                                                <div className="flex justify-end space-x-2">
-                                                    <Button variant="ghost" className="text-blue-500 hover:text-blue-600 p-1 sm:p-2" onClick={() => handleEditClick(user)}>
-                                                        Edit
-                                                    </Button>
-                                                    <Button variant="ghost" className="text-blue-500 hover:text-blue-600 p-1 sm:p-2" onClick={() => handleDeleteClick(user._id)}>
-                                                        <LucideX />
-                                                    </Button>
+                                                <Button variant="ghost" className="text-blue-500 hover:text-blue-600 p-1 sm:p-2" onClick={() => handleDeleteClick(user._id)}>
+                                                    <LucideX />
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                    {expandedRows.has(user._id) && (
+                                        <TableRow>
+                                            <TableCell colSpan={3}>
+                                                <div className="p-4 bg-gray-50">
+                                                    <p><strong>Email:</strong> {user.email}</p>
+                                                    <p><strong>Role:</strong> {user.role || "User"}</p>
                                                 </div>
                                             </TableCell>
                                         </TableRow>
-                                        {expandedRows.has(user._id) && (
-                                            <TableRow>
-                                                <TableCell colSpan={3}>
-                                                    <div className="p-4 bg-gray-50">
-                                                        <p><strong>Email:</strong> {user.email}</p>
-                                                        <p><strong>Role:</strong> {user.role || "User"}</p>
-                                                        {/* Add any other user details you want to display */}
-                                                    </div>
-                                                </TableCell>
-                                            </TableRow>
-                                        )}
-                                    </React.Fragment>
-                                ))}
+                                    )}
+                                </React.Fragment>
+                            ))}
                         </TableBody>
                     </Table>
                 </div>
                 <div className="flex flex-col sm:flex-row items-center justify-between mt-4 space-y-4 sm:space-y-0">
-                    <p className="text-sm text-gray-600">Showing {users.length} of 20 users</p>
+                    <p className="text-sm text-gray-600">
+                        Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, totalUsers)} of {totalUsers} users
+                    </p>
                     <div className="flex items-center space-x-2">
-                        <Button variant="outline" size="icon">
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                        >
                             <ChevronLeft className="h-4 w-4"/>
                         </Button>
-                        <Button variant="outline" size="icon">
+                        <span className="text-sm text-gray-600">
+                            Page {currentPage} of {totalPages}
+                        </span>
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                        >
                             <ChevronRight className="h-4 w-4"/>
                         </Button>
                     </div>

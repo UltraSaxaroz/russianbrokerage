@@ -1,14 +1,15 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Home, Users, Menu, X, Truck } from "lucide-react"
+import {Menu, X, Truck, UserPlus, ListIcon, Plus} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
 const menuItems = [
-    { icon: Home, label: "Register a user", url: '/admin/register' },
-    { icon: Users, label: "Users", url: '/admin/user' },
-    { icon: Truck, label: "Add driver", url: '/admin/driver' },
+    { icon: UserPlus, label: "Register a user", url: '/admin/register' },
+    { icon: ListIcon, label: "Users", url: '/admin/user' },
+    { icon: Plus, label: "Add driver", url: '/admin/driver' },
+    { icon: Truck, label: "Browse Drivers", url: '/admin/panel' },
 ]
 
 export default function AdminSide() {
