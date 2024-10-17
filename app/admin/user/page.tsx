@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChevronLeft, ChevronRight, LucideX, Search, UserPlus } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp, LucideX, Search, UserPlus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +19,7 @@ export default function Page() {
     const [formData, setFormData] = useState({name: '', email: '', role: ''});
     const { toast } = useToast();
     const [searchQuery, setSearchQuery] = useState('');
+    const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -118,6 +119,18 @@ export default function Page() {
         }
     };
 
+    const toggleRowExpansion = (userId: string) => {
+        setExpandedRows(prevExpandedRows => {
+            const newExpandedRows = new Set(prevExpandedRows);
+            if (newExpandedRows.has(userId)) {
+                newExpandedRows.delete(userId);
+            } else {
+                newExpandedRows.add(userId);
+            }
+            return newExpandedRows;
+        });
+    };
+
     if (loading) {
         return <div className="flex justify-center items-center h-screen">Loading users...</div>;
     }
@@ -151,9 +164,8 @@ export default function Page() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-1/3 sm:w-auto">User</TableHead>
-                                <TableHead className="w-1/3 sm:w-auto">Email</TableHead>
-                                <TableHead className="w-1/3 sm:w-auto">Role</TableHead>
+                                <TableHead className="w-12"></TableHead>
+                                <TableHead>User</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -164,29 +176,53 @@ export default function Page() {
                                     user.email.toLowerCase().includes(searchQuery.toLowerCase())
                                 )
                                 .map((user) => (
-                                    <TableRow key={user._id}>
-                                        <TableCell className="font-medium">
-                                            <div className="flex items-center">
-                                                <Avatar className="h-8 w-8 mr-2">
-                                                    <AvatarImage src={user.avatarUrl || "/placeholder.svg?height=32&width=32"} alt={user.name} />
-                                                    <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                                                </Avatar>
-                                                <span className="hidden sm:inline">{user.name}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="hidden sm:table-cell">{user.email}</TableCell>
-                                        <TableCell className="hidden sm:table-cell">{user.role || "User"}</TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex justify-end space-x-2">
-                                                <Button variant="ghost" className="text-blue-500 hover:text-blue-600 p-1 sm:p-2" onClick={() => handleEditClick(user)}>
-                                                    Edit
+                                    <React.Fragment key={user._id}>
+                                        <TableRow>
+                                            <TableCell>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => toggleRowExpansion(user._id)}
+                                                >
+                                                    {expandedRows.has(user._id) ? (
+                                                        <ChevronUp className="h-4 w-4" />
+                                                    ) : (
+                                                        <ChevronDown className="h-4 w-4" />
+                                                    )}
                                                 </Button>
-                                                <Button variant="ghost" className="text-blue-500 hover:text-blue-600 p-1 sm:p-2" onClick={() => handleDeleteClick(user._id)}>
-                                                    <LucideX />
-                                                </Button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
+                                            </TableCell>
+                                            <TableCell className="font-medium">
+                                                <div className="flex items-center">
+                                                    <Avatar className="h-8 w-8 mr-2">
+                                                        <AvatarImage src={user.avatarUrl || "/placeholder.svg?height=32&width=32"} alt={user.name} />
+                                                        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                                                    </Avatar>
+                                                    <span>{user.name}</span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <div className="flex justify-end space-x-2">
+                                                    <Button variant="ghost" className="text-blue-500 hover:text-blue-600 p-1 sm:p-2" onClick={() => handleEditClick(user)}>
+                                                        Edit
+                                                    </Button>
+                                                    <Button variant="ghost" className="text-blue-500 hover:text-blue-600 p-1 sm:p-2" onClick={() => handleDeleteClick(user._id)}>
+                                                        <LucideX />
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                        {expandedRows.has(user._id) && (
+                                            <TableRow>
+                                                <TableCell colSpan={3}>
+                                                    <div className="p-4 bg-gray-50">
+                                                        <p><strong>Email:</strong> {user.email}</p>
+                                                        <p><strong>Role:</strong> {user.role || "User"}</p>
+                                                        {/* Add any other user details you want to display */}
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+                                    </React.Fragment>
                                 ))}
                         </TableBody>
                     </Table>
