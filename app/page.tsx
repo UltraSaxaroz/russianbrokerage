@@ -39,7 +39,7 @@ export default function Homepage() {
                             <rect width="40" height="40" rx="8" fill="#10B981"/>
                             <path d="M20 8C13.373 8 8 13.373 8 20s5.373 12 12 12 12-5.373 12-12S26.627 8 20 8zm0 22c-5.514 0-10-4.486-10-10S14.486 10 20 10s10 4.486 10 10-4.486 10-10 10zm-2-15.5V20l6 4-1.5 2.5L15 22v-7.5h3z" fill="white"/>
                         </svg>
-                        <span className="text-2xl font-bold text-gray-900">Комар</span>
+                        <span className="text-2xl font-bold text-gray-900">КАМАР</span>
                     </Link>
                     <nav className="hidden md:flex space-x-6">
                         <Link href="#how-it-works" className="text-gray-600 hover:text-green-600 transition-colors">Как это работает</Link>
@@ -55,7 +55,7 @@ export default function Homepage() {
             </header>
 
             {/* Main content */}
-            <main className="relative z-10 container mx-auto px-4 py-12">
+            <main className="relative z-10 container mx-auto px-6 sm:px-12 py-12">
                 {/* Hero section */}
                 <section className="text-center mb-24">
                     <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4">Соединяем дороги и возможности</h1>
@@ -121,7 +121,7 @@ export default function Homepage() {
 
                 {/* Benefits section */}
                 <section id="benefits" className="mb-24">
-                    <h2 className="text-4xl font-bold text-gray-900 mb-12 text-center">Преимущества Комар</h2>
+                    <h2 className="text-4xl font-bold text-gray-900 mb-12 text-center">Преимущества КАМАР</h2>
                     <div className="grid md:grid-cols-2 gap-12">
                         <Card className="border-none shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
                             <div className="relative">
@@ -189,9 +189,9 @@ export default function Homepage() {
                     <h2 className="text-4xl font-bold text-gray-900 mb-12 text-center">Отзывы наших пользователей</h2>
                     <div className="grid md:grid-cols-3 gap-8">
                         {[
-                            { name: "Иван П.", role: "Водитель", quote: "Комар помог мне найти стабильную работу и увеличить доход." },
+                            { name: "Иван П.", role: "Водитель", quote: "КАМАР помог мне найти стабильную работу и увеличить доход." },
                             { name: "Анна С.", role: "Логист", quote: "Благодаря платформе, мы оптимизировали наши перевозки на 30%." },
-                            { name: "Михаил К.", role: "Владелец компании", quote: "Комар - незаменимый инструмент для нашего бизнеса." },
+                            { name: "Михаил К.", role: "Владелец компании", quote: "КАМАР - незаменимый инструмент для нашего бизнеса." },
                         ].map((testimonial, index) => (
                             <Card key={index} className="border-none shadow-lg hover:shadow-xl transition-shadow duration-300">
                                 <CardContent className="pt-6">
@@ -222,7 +222,7 @@ export default function Homepage() {
                         </svg>
                     </div>
                     <h2 className="text-4xl font-bold mb-4 relative z-10">Готовы начать?</h2>
-                    <p className="text-xl mb-8 relative z-10">Присоединяйтесь к Комар сегодня и откройте новые возможности</p>
+                    <p className="text-xl mb-8 relative z-10">Присоединяйтесь к КАМАР сегодня и откройте новые возможности</p>
                     <Button size="lg" variant="secondary" className="bg-white text-green-600 hover:bg-green-50 relative z-10">
                         Зарегистрироваться
                         <ChevronRight className="ml-2 h-5 w-5" />
@@ -240,7 +240,7 @@ export default function Homepage() {
                                     <rect width="32" height="32" rx="6" fill="#10B981"/>
                                     <path d="M16 6C10.477 6 6 10.477 6 16s4.477 10 10 10 10-4.477 10-10S21.523 6 16 6zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm-2-12v6l6 3-1.5 2-6-4V12h1.5z" fill="white"/>
                                 </svg>
-                                <span className="text-xl font-bold">Комар</span>
+                                <span className="text-xl font-bold">КАМАР</span>
                             </Link>
                             <p className="text-gray-400">Соединяем дороги и возможности</p>
                         </div>
@@ -267,7 +267,7 @@ export default function Homepage() {
                         </div>
                     </div>
                     <div className="mt-12 pt-8 border-t border-gray-800 text-center text-gray-400">
-                        © 2024 Комар. Все права защищены.
+                        © 2024 КАМАР. Все права защищены.
                     </div>
                 </div>
             </footer>
