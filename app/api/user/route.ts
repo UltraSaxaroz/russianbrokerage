@@ -31,9 +31,22 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const client = await clientPromise;
     const db = client.db(); // Убедитесь, что имя базы данных правильное
 
+    // Получаем параметры пагинации из запроса
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');  // Текущая страница, по умолчанию 1
+    const limit = parseInt(searchParams.get('limit') || '5'); // Количество пользователей на странице, по умолчанию 5
+
+    const skip = (page - 1) * limit; // Определяем, сколько записей нужно пропустить
+
     try {
-        // Получаем всех пользователей
-        const users = await db.collection<User>('users').find({}).toArray();
+        // Получаем пользователей с учетом пагинации
+        const users = await db.collection<User>('users')
+            .find({})
+            .skip(skip) // Пропускаем нужное количество документов
+            .limit(limit) // Ограничиваем количество возвращаемых документов
+            .toArray();
+
+        const totalUsers = await db.collection<User>('users').countDocuments(); // Общее количество пользователей
 
         // Преобразуем данные пользователей
         const userData = users.map(user => {
@@ -50,8 +63,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             }
         }).filter(user => user !== null);
 
-        // Возвращаем массив всех пользователей
-        return NextResponse.json({data: userData}, {status: 200});
+        // Возвращаем данные пользователей с информацией о пагинации
+        return NextResponse.json({
+            data: userData,
+            currentPage: page,
+            totalPages: Math.ceil(totalUsers / limit),
+            totalUsers: totalUsers,
+        }, {status: 200});
     } catch (err) {
         console.error('Error fetching users:', err);
         return NextResponse.json({message: 'Server error'}, {status: 500});

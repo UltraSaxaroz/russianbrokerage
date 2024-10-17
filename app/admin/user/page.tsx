@@ -16,10 +16,13 @@ export default function Page() {
     const [error, setError] = useState<string | null>(null);
     const [editUser, setEditUser] = useState<any | null>(null);
     const [showModal, setShowModal] = useState(false);
-    const [formData, setFormData] = useState({name: '', email: '', role: ''});
+    const [formData, setFormData] = useState({ name: '', email: '', role: '' });
     const { toast } = useToast();
     const [searchQuery, setSearchQuery] = useState('');
     const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [limit] = useState(5); // Количество пользователей на страницу
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -28,7 +31,7 @@ export default function Page() {
 
             try {
                 const token = localStorage.getItem('token');
-                const res = await fetch('/api/user', {
+                const res = await fetch(`/api/user?page=${currentPage}&limit=${limit}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -40,6 +43,7 @@ export default function Page() {
 
                 const data = await res.json();
                 setUsers(data.data || []);
+                setTotalPages(data.totalPages || 1);
             } catch (error: any) {
                 setError(error.message);
             } finally {
@@ -48,17 +52,17 @@ export default function Page() {
         };
 
         fetchUsers();
-    }, []);
+    }, [currentPage]);
 
     const handleEditClick = (user: any) => {
         setEditUser(user);
-        setFormData({name: user.name, email: user.email, role: user.role});
+        setFormData({ name: user.name, email: user.email, role: user.role });
         setShowModal(true);
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const {name, value} = e.target;
-        setFormData(prevData => ({...prevData, [name]: value}));
+        const { name, value } = e.target;
+        setFormData(prevData => ({ ...prevData, [name]: value }));
     };
 
     const handleSave = async () => {
@@ -83,14 +87,14 @@ export default function Page() {
             }
             setUsers(prevUsers =>
                 prevUsers.map(user =>
-                    user._id === editUser._id ? {...user, ...formData} : user
+                    user._id === editUser._id ? { ...user, ...formData } : user
                 )
             );
 
             setShowModal(false);
-            toast({description: 'User updated successfully!'});
+            toast({ description: 'User updated successfully!' });
         } catch (error) {
-            toast({description: 'Failed to update user', variant: 'destructive'});
+            toast({ description: 'Failed to update user', variant: 'destructive' });
         }
     };
 
@@ -129,6 +133,14 @@ export default function Page() {
             }
             return newExpandedRows;
         });
+    };
+
+    const handlePreviousPage = () => {
+        if (currentPage > 1) setCurrentPage(currentPage - 1);
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) setCurrentPage(currentPage + 1);
     };
 
     if (loading) {
@@ -214,9 +226,8 @@ export default function Page() {
                                             <TableRow>
                                                 <TableCell colSpan={3}>
                                                     <div className="p-4 bg-gray-50">
-                                                        <p><strong>Email:</strong> {user.email}</p>
-                                                        <p><strong>Role:</strong> {user.role || "User"}</p>
-                                                        {/* Add any other user details you want to display */}
+                                                        <strong>Email:</strong> {user.email} <br />
+                                                        <strong>Role:</strong> {user.role}
                                                     </div>
                                                 </TableCell>
                                             </TableRow>
@@ -226,16 +237,24 @@ export default function Page() {
                         </TableBody>
                     </Table>
                 </div>
-                <div className="flex flex-col sm:flex-row items-center justify-between mt-4 space-y-4 sm:space-y-0">
-                    <p className="text-sm text-gray-600">Showing {users.length} of 20 users</p>
-                    <div className="flex items-center space-x-2">
-                        <Button variant="outline" size="icon">
-                            <ChevronLeft className="h-4 w-4"/>
-                        </Button>
-                        <Button variant="outline" size="icon">
-                            <ChevronRight className="h-4 w-4"/>
-                        </Button>
-                    </div>
+
+                <div className="flex justify-end space-x-2 mt-4">
+                    <Button
+                        variant="ghost"
+                        className="text-blue-500 hover:text-blue-600"
+                        onClick={handlePreviousPage}
+                        disabled={currentPage === 1}
+                    >
+                        <ChevronLeft />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        className="text-blue-500 hover:text-blue-600"
+                        onClick={handleNextPage}
+                        disabled={currentPage === totalPages}
+                    >
+                        <ChevronRight />
+                    </Button>
                 </div>
             </div>
 
@@ -244,29 +263,29 @@ export default function Page() {
                     <DialogHeader>
                         <DialogTitle>Edit User</DialogTitle>
                     </DialogHeader>
-                    <div className="space-y-4">
+                    <div className="grid gap-4 py-4">
                         <Input
+                            placeholder="Name"
                             name="name"
                             value={formData.name}
                             onChange={handleInputChange}
-                            placeholder="Name"
                         />
                         <Input
+                            placeholder="Email"
                             name="email"
                             value={formData.email}
                             onChange={handleInputChange}
-                            placeholder="Email"
                         />
                         <Input
+                            placeholder="Role"
                             name="role"
                             value={formData.role}
                             onChange={handleInputChange}
-                            placeholder="Role"
                         />
                     </div>
                     <DialogFooter>
-                        <Button onClick={() => setShowModal(false)}>Cancel</Button>
-                        <Button onClick={handleSave} className="bg-blue-500 text-white">Save</Button>
+                        <Button variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
+                        <Button className="bg-blue-500 hover:bg-blue-600 text-white" onClick={handleSave}>Save</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
