@@ -1,9 +1,8 @@
-// pages/api/auth/forgot-password.ts
+// app/api/auth/forgot-password/route.ts
 import nodemailer from 'nodemailer';
-import clientPromise from '@/lib/mongodb';
 import { NextRequest, NextResponse } from 'next/server';
-import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
+import clientPromise from '@/lib/mongodb';
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
     const { email } = await request.json();
@@ -24,10 +23,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Настройки почтового сервиса
     const transporter = nodemailer.createTransport({
-        service: 'gmail', // или используйте другой сервис
+        service: 'gmail',
         auth: {
+            type: 'OAuth2',
             user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+            accessToken: process.env.GOOGLE_ACCESS_TOKEN, // Если необходимо
         },
     });
 

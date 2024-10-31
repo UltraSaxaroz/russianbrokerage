@@ -1,33 +1,38 @@
+// app/api/auth/reset-password/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
-// @ts-expect-error калообразование бкрипта
-import { hash } from 'bcrypt';
-import { ObjectId } from 'mongodb';
 import clientPromise from '@/lib/mongodb';
+// @ts-expect-error niggadie bcrypt developer
+import bcrypt from 'bcrypt';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+import { ObjectId } from 'mongodb'; // Import ObjectId
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
     const { token, newPassword } = await request.json();
+
+    // Верификация токена
+    let userId: string | undefined;
+    try {
+        const payload = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+        userId = payload.id; // Здесь мы уверены, что это JwtPayload
+    } catch (error) {
+        return new NextResponse(JSON.stringify({ message: 'Invalid token' }), { status: 400 });
+    }
+
+    if (!userId) {
+        return new NextResponse(JSON.stringify({ message: 'User not found' }), { status: 400 });
+    }
+
     const client = await clientPromise;
     const db = client.db();
 
-    try {
-        // Декодирование токена и извлечение userId
-        const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
+    // Хеширование нового пароля
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-        // Преобразование userId в ObjectId для поиска в MongoDB
-        const userObjectId = new ObjectId(decoded.userId);
+    // Обновление пароля в базе данных, преобразуем userId в ObjectId
+    await db.collection('users').updateOne(
+        { _id: new ObjectId(userId) }, // Convert userId to ObjectId
+        { $set: { password: hashedPassword } }
+    );
 
-        // Хэширование нового пароля
-        const hashedPassword = await hash(newPassword, 10);
-
-        // Обновление пароля пользователя
-        await db.collection('users').updateOne(
-            { _id: userObjectId },
-            { $set: { password: hashedPassword } }
-        );
-
-        return new NextResponse(JSON.stringify({ message: 'Password has been reset' }), { status: 200 });
-    } catch (error) {
-        return new NextResponse(JSON.stringify({ message: 'Invalid or expired token' }), { status: 400 });
-    }
+    return new NextResponse(JSON.stringify({ message: 'Password updated successfully' }), { status: 200 });
 }
