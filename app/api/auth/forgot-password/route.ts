@@ -1,38 +1,50 @@
-import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+// pages/api/auth/forgot-password.ts
 import nodemailer from 'nodemailer';
 import clientPromise from '@/lib/mongodb';
+import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
     const { email } = await request.json();
     const client = await clientPromise;
     const db = client.db();
 
-    // Проверка, существует ли пользователь с таким email
     const user = await db.collection('users').findOne({ email });
+
     if (!user) {
         return new NextResponse(JSON.stringify({ message: 'User not found' }), { status: 404 });
     }
 
-    // Генерация временного JWT токена для сброса пароля (15 минут)
-    const token = jwt.sign({ userId: user._id.toString() }, process.env.JWT_SECRET!, { expiresIn: '15m' });
+    // Генерация токена для сброса пароля
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET!, { expiresIn: '1h' });
 
-    // Настройка транспондера для отправки email через Gmail
+    // Создание URL для сброса пароля
+    const resetUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/reset-password/${token}`;
+
+    // Настройки почтового сервиса
     const transporter = nodemailer.createTransport({
-        service: 'gmail', // Используем Gmail
+        service: 'gmail', // или используйте другой сервис
         auth: {
-            user: process.env.EMAIL_USER, // Ваш email
-            pass: process.env.EMAIL_PASS, // Ваш пароль или приложение пароль
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
         },
     });
 
-    // Отправка email с токеном для сброса пароля
-    await transporter.sendMail({
+    // Сообщение
+    const mailOptions = {
         from: process.env.EMAIL_FROM,
         to: email,
-        subject: 'Password Reset Request',
-        text: `To reset your password, click the link: https://your-domain.com/reset-password?token=${token}`,
-    });
+        subject: 'Password Reset',
+        text: `To reset your password, please click on the following link: ${resetUrl}`,
+    };
 
-    return new NextResponse(JSON.stringify({ message: 'Reset link sent to email' }), { status: 200 });
+    // Отправка почты
+    try {
+        await transporter.sendMail(mailOptions);
+        return new NextResponse(JSON.stringify({ message: 'Password reset link sent' }), { status: 200 });
+    } catch (error) {
+        console.error('Error sending email:', error);
+        return new NextResponse(JSON.stringify({ message: 'Error sending email' }), { status: 500 });
+    }
 }

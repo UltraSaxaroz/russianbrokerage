@@ -1,3 +1,5 @@
+'use client'
+
 // components/ResetPassword.tsx
 import { useState } from 'react';
 import { useRouter } from 'next/router';
