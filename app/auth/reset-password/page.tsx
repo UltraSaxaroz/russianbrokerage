@@ -1,17 +1,28 @@
-'use client'
 // app/reset-password/page.tsx
-import React, { useState } from 'react';
-import { useRouter } from 'next/router';
+'use client'; // Add this line to make it a client component
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const ResetPassword = () => {
     const router = useRouter();
-    const { token } = router.query; // Get the token from the query
     const [newPassword, setNewPassword] = useState('');
     const [message, setMessage] = useState('');
+    const [token, setToken] = useState<string | null>(null); // State to store the token
+
+    // Use useEffect to get the token from URL
+    useEffect(() => {
+        const searchParams = new URLSearchParams(window.location.search);
+        const tokenFromUrl = searchParams.get('token');
+        setToken(tokenFromUrl); // Set the token state
+    }, []); // Empty dependency array to run only once
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!token) return; // Check if token is available
+        if (!token) {
+            setMessage('Token is missing');
+            return;
+        }
 
         try {
             const response = await fetch('/api/auth/reset-password', {
@@ -25,6 +36,7 @@ const ResetPassword = () => {
             if (response.ok) {
                 setMessage(data.message);
                 // Optionally redirect to login page or homepage
+                router.push('/login'); // Redirect after successful password reset
             } else {
                 setMessage(data.message);
             }
