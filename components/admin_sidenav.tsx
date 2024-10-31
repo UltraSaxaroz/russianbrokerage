@@ -24,7 +24,6 @@ export default function AdminSide() {
         window.addEventListener('resize', handleResize)
         return () => window.removeEventListener('resize', handleResize)
     }, [])
-
     return (
         <div className="flex h-full min-h-screen overflow-hidden border shadow-2xl">
             <Button

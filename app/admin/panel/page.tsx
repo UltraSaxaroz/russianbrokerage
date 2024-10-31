@@ -51,6 +51,7 @@ export default function DriverPage() {
         location: '',
         weight: '',
     });
+
     const [pagination, setPagination] = useState<PaginationData>({
         page: 1,
         limit: 10,

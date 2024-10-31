@@ -7,9 +7,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Home, BarChart2, User, HelpCircle, Bell, Search, Menu, LogOut, X } from 'lucide-react'
 
 const navItems = [
-    { name: 'Main Panel', href: '/panel', icon: Home },
-    { name: 'Profile', href: '/panel/profile', icon: User },
-    { name: 'Help', href: '/help', icon: HelpCircle },
+    { name: 'Основная панель', href: '/panel', icon: Home },
+    { name: 'Профиль', href: '/panel/profile', icon: User },
+    { name: 'Помощь', href: '/panel/help', icon: HelpCircle },
 ]
 
 const logout = () => {
@@ -86,7 +86,7 @@ export default function AsidePanel() {
                         <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
-                        <span className="text-lg font-semibold">YourApp</span>
+                        <span className="text-lg font-semibold">Kamar Board</span>
                     </Link>
                 </div>
                 <div className="px-4 py-2">
@@ -137,7 +137,7 @@ export default function AsidePanel() {
                         onClick={logout}
                     >
                         <LogOut className="w-4 h-4" />
-                        <span className="font-medium">Logout</span>
+                        <span className="font-medium">Выйти</span>
                     </motion.button>
                 </div>
             </motion.aside>

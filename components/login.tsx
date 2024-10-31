@@ -5,6 +5,7 @@ import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {TabsContent} from "@/components/ui/tabs";
 import {useRouter} from "next/navigation";
+import Link from 'next/link';
 
 const Login = () => {
     const [email, setEmail] = useState('')
@@ -84,19 +85,22 @@ const Login = () => {
                                 onChange={(e) => setPassword(e.target.value)}
                             />
                         </div>
-
+                        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
                     </CardContent>
-                    <CardFooter>
+                    <CardFooter className="flex flex-col space-y-4 sm:space-x-4">
                         <Button
                             className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 transition-all duration-200"
                             disabled={isLoading} type="submit">
                             {isLoading ? "Ожидание.." : "Войти"}
                         </Button>
+                        <Link href="/auth/password-recovery" className="w-full sm:w-auto text-sm">
+                            Забыли пароль? <span className={'font-semibold'}>Восстановить</span>
+                        </Link>
                     </CardFooter>
                 </form>
             </Card>
         </TabsContent>
-);
+    );
 };
 
 export default Login;
