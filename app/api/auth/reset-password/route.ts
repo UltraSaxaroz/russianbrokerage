@@ -1,38 +1,36 @@
-// app/api/auth/reset-password/route.ts
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import jwt from 'jsonwebtoken';
+// @ts-expect-error niggasaurus 123
+import { hash } from 'bcrypt';
+import {ObjectId} from 'mongodb';
 import clientPromise from '@/lib/mongodb';
-// @ts-expect-error niggadie bcrypt developer
-import bcrypt from 'bcrypt';
-import jwt, { JwtPayload } from 'jsonwebtoken';
-import { ObjectId } from 'mongodb'; // Import ObjectId
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
+export async function POST(request: Request) {
     const { token, newPassword } = await request.json();
 
-    // Верификация токена
-    let userId: string | undefined;
     try {
-        const payload = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
-        userId = payload.id; // Здесь мы уверены, что это JwtPayload
+        const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
+        const client = await clientPromise;
+        const db = client.db();
+
+        const hashedPassword = await hash(newPassword, 10);
+
+        const result = await db.collection('users').updateOne(
+            { _id: new ObjectId(decoded.userId)  },
+            { $set: { password: hashedPassword } }
+        );
+
+        if (result.modifiedCount === 1) {
+            return NextResponse.json({ message: 'Пароль успешно обновлен' });
+        } else {
+            return NextResponse.json({ message: 'Не удалось обновить пароль' }, { status: 400 });
+        }
     } catch (error) {
-        return new NextResponse(JSON.stringify({ message: 'Invalid token' }), { status: 400 });
+        if (error instanceof jwt.JsonWebTokenError) {
+            return NextResponse.json({ message: 'Недействительный или истекший токен' }, { status: 400 });
+        } else {
+            console.error('Error resetting password:', error);
+            return NextResponse.json({ message: 'Произошла ошибка при сбросе пароля' }, { status: 500 });
+        }
     }
-
-    if (!userId) {
-        return new NextResponse(JSON.stringify({ message: 'User not found' }), { status: 400 });
-    }
-
-    const client = await clientPromise;
-    const db = client.db();
-
-    // Хеширование нового пароля
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    // Обновление пароля в базе данных, преобразуем userId в ObjectId
-    await db.collection('users').updateOne(
-        { _id: new ObjectId(userId) }, // Convert userId to ObjectId
-        { $set: { password: hashedPassword } }
-    );
-
-    return new NextResponse(JSON.stringify({ message: 'Password updated successfully' }), { status: 200 });
 }

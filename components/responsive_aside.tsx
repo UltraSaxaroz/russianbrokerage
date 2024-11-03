@@ -1,10 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Home, BarChart2, User, HelpCircle, Bell, Search, Menu, LogOut, X } from 'lucide-react'
+import { Home, User, HelpCircle, Search, Menu, LogOut, X, Zap } from 'lucide-react'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
 
 const navItems = [
     { name: 'Основная панель', href: '/panel', icon: Home },
@@ -21,6 +24,7 @@ export default function AsidePanel() {
     const pathname = usePathname()
     const [isOpen, setIsOpen] = useState(false)
     const [isMobile, setIsMobile] = useState(true)
+    const [searchQuery, setSearchQuery] = useState('')
 
     const toggleMenu = () => setIsOpen(!isOpen)
 
@@ -29,6 +33,8 @@ export default function AsidePanel() {
             setIsMobile(window.innerWidth < 1024)
             if (window.innerWidth >= 1024) {
                 setIsOpen(true)
+            } else {
+                setIsOpen(false)
             }
         }
 
@@ -50,17 +56,26 @@ export default function AsidePanel() {
         }
     }, [isOpen, isMobile])
 
+    const filteredNavItems = useMemo(() => {
+        return navItems.filter(item =>
+            item.name.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+    }, [searchQuery])
+
     return (
-        <div className={'border-2 shadow-2xl'}>
-            {isMobile && (
-                <button
-                    onClick={toggleMenu}
-                    className="fixed top-4 right-4 z-50 text-gray-600 hover:text-gray-800 transition-colors"
-                    aria-label={isOpen ? "Close menu" : "Open menu"}
-                >
-                    {isOpen ? <div className={'bg-black rounded-md p-2 transition-all'}><X className="text-white w-6 h-6" /></div> : <Menu className="w-6 h-6" />}
-                </button>
-            )}
+        <>
+            <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleMenu}
+                className={cn(
+                    "fixed top-4 right-4 z-50 lg:hidden",
+                    "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+                )}
+                aria-label={isOpen ? "Закрыть меню" : "Открыть меню"}
+            >
+                {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </Button>
 
             <AnimatePresence>
                 {isOpen && isMobile && (
@@ -68,7 +83,7 @@ export default function AsidePanel() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black bg-opacity-50 z-30"
+                        className="fixed inset-0 bg-background/80 backdrop-blur-sm z-30 lg:hidden"
                         onClick={toggleMenu}
                     />
                 )}
@@ -78,69 +93,115 @@ export default function AsidePanel() {
                 initial={false}
                 animate={{ x: isOpen || !isMobile ? 0 : '-100%' }}
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="fixed top-0 left-0 w-64 h-full bg-gray-100 text-gray-800 flex flex-col z-50 lg:relative lg:translate-x-0 lg:w-72"
-                style={{ willChange: 'transform' }}
+                className={cn(
+                    "fixed top-0 left-0 bottom-0 z-40",
+                    "w-[280px] sm:w-[320px] lg:w-72 xl:w-80",
+                    "lg:sticky lg:top-0 lg:h-screen",
+                    "flex flex-col",
+                    "bg-gradient-to-b from-background to-background/95 backdrop-blur-sm",
+                    "border-r shadow-xl"
+                )}
             >
-                <div className="p-4 flex items-center justify-between border-b border-gray-200">
-                    <Link href="/" className="flex items-center space-x-2">
-                        <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                        <span className="text-lg font-semibold">Kamar Board</span>
+                <div className="p-4 sm:p-6 border-b bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">
+                    <Link
+                        href="/"
+                        className="flex items-center space-x-2 group"
+                    >
+                        <div className="p-2 rounded-xl bg-primary text-primary-foreground shadow-lg group-hover:shadow-primary/25 transition-shadow">
+                            <Zap className="w-5 h-5" />
+                        </div>
+                        <span className="text-lg sm:text-xl font-semibold tracking-tight">
+              Kamar Board
+            </span>
                     </Link>
                 </div>
-                <div className="px-4 py-2">
-                    <div className="relative">
-                        <input
+
+                <div className="p-4 border-b">
+                    <div className="relative group">
+                        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <Input
                             type="text"
-                            placeholder="Search..."
-                            className="w-full bg-white text-gray-800 placeholder-gray-400 rounded-md py-1 pl-8 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
+                            placeholder="Поиск..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-9 bg-muted/50 border-muted-foreground/20 hover:border-primary/30 focus:border-primary transition-colors"
                         />
-                        <Search className="absolute left-2 top-1.5 w-4 h-4 text-gray-400" />
                     </div>
                 </div>
-                <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
-                    {navItems.map((item) => {
-                        const isActive = pathname === item.href
-                        return (
-                            <motion.div
-                                key={item.name}
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                            >
-                                <Link
-                                    href={item.href}
-                                    className={`flex items-center space-x-3 px-3 py-2 rounded-md transition-colors ${
-                                        isActive
-                                            ? 'bg-gray-200 text-gray-900'
-                                            : 'text-gray-600 hover:bg-gray-200 hover:text-gray-900'
-                                    }`}
-                                    onClick={() => {
-                                        if (isMobile) {
-                                            setIsOpen(false)
-                                            document.body.style.overflow = 'visible'
-                                        }
-                                    }}
-                                >
-                                    <item.icon className={`w-4 h-4 ${isActive ? 'text-gray-900' : 'text-gray-500'}`} />
-                                    <span className="text-base font-medium">{item.name}</span>
-                                </Link>
+
+                <nav className="flex-1 px-3 py-4 overflow-y-auto">
+                    <AnimatePresence initial={false}>
+                        {filteredNavItems.length > 0 ? (
+                            <motion.div className="space-y-1.5">
+                                {filteredNavItems.map((item) => {
+                                    const isActive = pathname === item.href
+                                    return (
+                                        <motion.div
+                                            key={item.name}
+                                            initial={{ opacity: 0, y: -10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -10 }}
+                                            transition={{ duration: 0.2 }}
+                                        >
+                                            <Link
+                                                href={item.href}
+                                                onClick={() => {
+                                                    if (isMobile) {
+                                                        setIsOpen(false)
+                                                        document.body.style.overflow = 'visible'
+                                                    }
+                                                }}
+                                                className={cn(
+                                                    "flex items-center space-x-3 px-4 py-3 rounded-lg transition-all",
+                                                    "hover:bg-accent hover:text-accent-foreground",
+                                                    "active:bg-accent/80",
+                                                    isActive && "bg-primary/10 text-primary shadow-sm",
+                                                    !isActive && "text-muted-foreground hover:text-primary"
+                                                )}
+                                            >
+                                                <item.icon className={cn(
+                                                    "h-5 w-5 transition-transform",
+                                                    isActive ? "text-primary scale-110" : "text-muted-foreground group-hover:text-primary"
+                                                )} />
+                                                <span className="text-base font-medium">{item.name}</span>
+                                                {isActive && (
+                                                    <motion.div
+                                                        layoutId="activeIndicator"
+                                                        className="ml-auto w-1.5 h-1.5 rounded-full bg-primary"
+                                                        initial={{ scale: 0 }}
+                                                        animate={{ scale: 1 }}
+                                                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                                    />
+                                                )}
+                                            </Link>
+                                        </motion.div>
+                                    )
+                                })}
                             </motion.div>
-                        )
-                    })}
+                        ) : (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="text-center text-muted-foreground py-4"
+                            >
+                                Ничего не найдено
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </nav>
-                <div className="p-4 z-20 sm:pb-4 sm:pt-4 pt-12 pb-12 border-t border-gray-200">
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="w-full flex items-center justify-center space-x-2 bg-white hover:bg-gray-200 text-gray-800 py-2 rounded-md transition-colors text-sm"
+
+                <div className="p-4 border-t mt-auto bg-gradient-to-t from-muted/50 to-transparent">
+                    <Button
+                        variant="secondary"
+                        className="w-full bg-background hover:bg-accent hover:text-accent-foreground group"
                         onClick={logout}
                     >
-                        <LogOut className="w-4 h-4" />
+                        <LogOut className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
                         <span className="font-medium">Выйти</span>
-                    </motion.button>
+                    </Button>
                 </div>
             </motion.aside>
-        </div>
+        </>
     )
 }
